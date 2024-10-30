@@ -1295,7 +1295,7 @@ function GoalTrack()
             if ($countplayer == $countfinal)
             {
                 $this->GoalTrack();
-                $this->EndGame();
+                $this->EndGame(1);
                 $this->AffichageScore();
                 undergrove::$instance->notifyAllPlayers('finmessagealerte','', array(
                     
@@ -1319,7 +1319,7 @@ function GoalTrack()
     }
 
 
-    function EndGame()
+    function EndGame($end=0)
     {
         $res  = array();
         $nbre = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
@@ -1420,7 +1420,10 @@ function GoalTrack()
             $id = $indice2['id'];
             $vp = $indice2['bonus'];
 
+            if($end ==1)
+            {
             self::DbQuery( "UPDATE player set player_score = player_score + {$vp} WHERE player_id={$id}" );
+            }
             $this->setStat($vp, 'tiles', $id);
             
             $position = self::getUniqueValueFromDB("SELECT player_no FROM player WHERE player_id={$id}");

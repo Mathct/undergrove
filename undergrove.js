@@ -2682,8 +2682,7 @@ function (dojo, declare) {
                 for (var id in notif.args.total)
                 {
                     var index = parseInt(id)+1;
-                    console.warn(id);
-                    console.warn(notif.args.total);
+                    
                 
                     $('padtotal_'+index).innerHTML = notif.args.total[id];
                     
