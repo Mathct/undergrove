@@ -438,7 +438,7 @@ class Champi37 extends Champi
         $ret["selectable"] = array();
         $ret['buttons'] = array();
         $ret['title'] = clienttranslate('${actplayer} activates a mushroom');
-        $ret['titleyou'] = clienttranslate('${you} can choose a 2nd seedling that will absorb the carbon');
+        $ret['titleyou'] = clienttranslate('${you} can choose a plant again that will absorb carbon');
 
         $explodesemi = explode("_", $parg1);
         $circle2 = "circle_".$explodesemi[1]."_".$explodesemi[2];
