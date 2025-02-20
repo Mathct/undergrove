@@ -4100,7 +4100,7 @@ function argConfirm($parg1, $parg2)
         $ret = array();
         $ret["selectable"] = array();
         $ret['buttons'] = array();
-        $ret['title'] = clienttranslate('${actplayer} does must confirm actions');
+        $ret['title'] = clienttranslate('${actplayer} must confirm action');
         $ret['titleyou'] = clienttranslate('${you} confirm your actions ?');
 
         
