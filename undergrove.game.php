@@ -94,7 +94,7 @@ class undergrove extends Table
         }
         $sql .= implode( ',', $values );
         self::DbQuery( $sql );
-        //self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
+        self::reattributeColorsBasedOnPreferences( $players, $gameinfos['player_colors'] );
         self::reloadPlayersBasicInfos();
 
 
