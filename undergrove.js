@@ -1599,7 +1599,7 @@ function (dojo, declare) {
 
         onZoomButton: function(deltaZoom) {
             zoom = this.trl_zoom + deltaZoom;
-            this.trl_zoom = zoom <= 0.6 ? 0.6 : zoom >= 1.2? 1.2 : zoom;  // zoom >= 1.4? 1.4 : zoom;
+            this.trl_zoom = zoom <= 0.6 ? 0.6 : zoom >= 1.6? 1.6 : zoom;  // zoom >= 1.4? 1.4 : zoom;
             dojo.style($('map_scrollable'), 'transform', 'scale(' + this.trl_zoom + ')');
             dojo.style($('map_scrollable_oversurface'), 'transform', 'scale(' + this.trl_zoom + ')');
         },
