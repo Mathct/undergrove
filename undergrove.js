@@ -78,15 +78,51 @@ function (dojo, declare) {
 
             if (this.prefs[100].value == 1)
            {
+            const mediaQuery = window.matchMedia('(max-width: 1500px)');
             dojo.query("#playerboard").addClass("masque");
             var monDiv = document.getElementById("global");
-            monDiv.style.height = "750px";
+
+            function updateHeight(e) {
+                if (e.matches) {
+                    monDiv.style.height = "1420px";
+                } else {
+                    monDiv.style.height = "750px";
+                }
+            }
+
+            // Première vérification immédiate :
+            updateHeight(mediaQuery);
+
+            // Écouteur d'événement pour les changements de taille :
+            mediaQuery.addEventListener('change', updateHeight);
+            
            }
+
            if (this.prefs[100].value == 2)
            {
+            const mediaQuery = window.matchMedia('(max-width: 1500px)');
             dojo.query("#playerboard").removeClass("masque");
             var monDiv = document.getElementById("global");
-                monDiv.style.height = "1350px";
+                //monDiv.style.height = "1420px";
+                
+            var monDiv2 = document.getElementById("playerboard");
+            
+
+            function updateHeight(e) {
+                if (e.matches) {
+                    monDiv.style.height = "2060px";
+                    monDiv2.style.top = "1456px";
+                } else {
+                    monDiv.style.height = "1420px";
+                }
+            }
+
+            // Première vérification immédiate :
+            updateHeight(mediaQuery);
+
+            // Écouteur d'événement pour les changements de taille :
+            mediaQuery.addEventListener('change', updateHeight);
+
            }
 
 
