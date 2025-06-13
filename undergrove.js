@@ -75,6 +75,7 @@ function (dojo, declare) {
             this.players = gamedatas.players;
 
 
+           
 
             if (this.prefs[100].value == 1)
            {
@@ -114,6 +115,7 @@ function (dojo, declare) {
                     monDiv2.style.top = "1456px";
                 } else {
                     monDiv.style.height = "1420px";
+                    monDiv2.style.top = "780px";
                 }
             }
 
@@ -124,6 +126,30 @@ function (dojo, declare) {
             mediaQuery.addEventListener('change', updateHeight);
 
            }
+
+        
+
+           /*if(this.isSpectator)
+           {
+            const mediaQuery = window.matchMedia('(max-width: 1500px)');
+            var monDiv3 = document.getElementById("global2");
+           
+
+            function updateHeight(e) {
+                if (e.matches) {
+                   // monDiv.style.height = "1420px";
+                } else {
+                    monDiv3.style.top = "-120px";
+                }
+            }
+
+            // Première vérification immédiate :
+            updateHeight(mediaQuery);
+
+            // Écouteur d'événement pour les changements de taille :
+            mediaQuery.addEventListener('change', updateHeight);
+
+           }*/
 
 
 
@@ -2374,7 +2400,8 @@ function (dojo, declare) {
 
                 for( var champi in notif.args.carboneschampi )
                 {
-                    
+                        //console.warn ('valeurcarbonechampi_'+notif.args.carboneschampi[champi]['id'])
+                        //console.warn ('valeurcarbonechampi_'+notif.args.carboneschampi[champi]['carbone'])
 
                         $('valeurcarbonechampi_'+notif.args.carboneschampi[champi]['id']).innerHTML = notif.args.carboneschampi[champi]['carbone'];
                     
