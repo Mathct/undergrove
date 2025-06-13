@@ -75,7 +75,7 @@ function (dojo, declare) {
             this.players = gamedatas.players;
 
 
-           
+           if(!this.isSpectator){
 
             if (this.prefs[100].value == 1)
            {
@@ -104,7 +104,7 @@ function (dojo, declare) {
             const mediaQuery = window.matchMedia('(max-width: 1500px)');
             dojo.query("#playerboard").removeClass("masque");
             var monDiv = document.getElementById("global");
-                //monDiv.style.height = "1420px";
+            
                 
             var monDiv2 = document.getElementById("playerboard");
             
@@ -125,21 +125,29 @@ function (dojo, declare) {
             // Écouteur d'événement pour les changements de taille :
             mediaQuery.addEventListener('change', updateHeight);
 
-           }
+           }}
 
         
 
-           /*if(this.isSpectator)
+           if(this.isSpectator)
            {
             const mediaQuery = window.matchMedia('(max-width: 1500px)');
-            var monDiv3 = document.getElementById("global2");
+            
            
 
             function updateHeight(e) {
                 if (e.matches) {
-                   // monDiv.style.height = "1420px";
-                } else {
+                var monDiv3 = document.getElementById("global2");
+                monDiv3.style.top = "500px";
+                var monDiv4 = document.getElementById("global");
+                monDiv4.style.height = "1230px";
+
+                } 
+                else{
+                    var monDiv3 = document.getElementById("global2");
                     monDiv3.style.top = "-120px";
+                    var monDiv4 = document.getElementById("global");
+                    monDiv4.style.height = "750px";
                 }
             }
 
@@ -149,7 +157,7 @@ function (dojo, declare) {
             // Écouteur d'événement pour les changements de taille :
             mediaQuery.addEventListener('change', updateHeight);
 
-           }*/
+           }
 
 
 
@@ -206,7 +214,7 @@ function (dojo, declare) {
                 dojo.query("#playertiles").addClass("masque");
                 dojo.query("#playerboard").addClass("masque");
                 var monDiv = document.getElementById("global");
-                monDiv.style.height = "750px";
+                //monDiv.style.height = "750px";
             }
             
             // Setting up player boards
