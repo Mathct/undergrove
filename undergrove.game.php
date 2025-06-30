@@ -824,7 +824,21 @@ function GoalTrack()
             SUM(CASE WHEN vp_racine4 % 2 = 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_pairs 
             FROM foret WHERE location = '{$locationsemijoueur}'");
            
-           $countpair=0;
+           
+            $totalChiffresPairs = $totalChiffresPairs + $ChiffresPairs;
+            
+
+            $ChiffresImpairs = self::getUniqueValueFromDB("SELECT 
+            SUM(CASE WHEN vp_racine1 % 2 <> 0 AND vp_racine1 != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN vp_racine2 % 2 <> 0 AND vp_racine2 != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN vp_racine3 % 2 <> 0 AND vp_racine3 != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN vp_racine4 % 2 <> 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_impairs 
+            FROM foret WHERE location = '{$locationsemijoueur}'");
+            $totalChiffresImpairs = $totalChiffresImpairs + $ChiffresImpairs;
+        
+        }
+
+        $countpair=0;
 
             $special = self::getObjectListFromDB( "SELECT card_location location, card_type type FROM champignon WHERE (card_type=41 OR card_type=42 OR card_type=43 OR card_type=44) AND card_location LIKE 'square%'");
             foreach($special as $square)
@@ -839,26 +853,14 @@ function GoalTrack()
                 
                     $recherche2 = "minisquare_".$expodesquare[1]."_".$expodesquare[2];
                     $countpair = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE location LIKE '$recherche2%' AND player_id={$player_id}", true ));
-                    
+                    $totalChiffresPairs = $totalChiffresPairs + $countpair;
                     
                 }
                 
                 
             }
 
-            $totalChiffresPairs = $totalChiffresPairs + $ChiffresPairs;
-            
-
-            $ChiffresImpairs = self::getUniqueValueFromDB("SELECT 
-            SUM(CASE WHEN vp_racine1 % 2 <> 0 AND vp_racine1 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine2 % 2 <> 0 AND vp_racine2 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine3 % 2 <> 0 AND vp_racine3 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine4 % 2 <> 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_impairs 
-            FROM foret WHERE location = '{$locationsemijoueur}'");
-            $totalChiffresImpairs = $totalChiffresImpairs + $ChiffresImpairs;
         
-        }
-        $totalChiffresPairs = $totalChiffresPairs + $countpair;
         self::DbQuery( "UPDATE goal set {$numero} = {$totalChiffresPairs} WHERE card_type = 9" );
         self::DbQuery( "UPDATE goal set {$numero} = {$totalChiffresImpairs} WHERE card_type = 10" );
 
@@ -1162,7 +1164,21 @@ function GoalTrack()
             SUM(CASE WHEN vp_racine4 % 2 = 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_pairs 
             FROM foret WHERE location = '{$locationsemijoueur}'");
            
-           $countpair=0;
+           
+            $totalChiffresPairs = $totalChiffresPairs + $ChiffresPairs;
+            
+
+            $ChiffresImpairs = self::getUniqueValueFromDB("SELECT 
+            SUM(CASE WHEN vp_racine1 % 2 <> 0 AND vp_racine1 != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN vp_racine2 % 2 <> 0 AND vp_racine2 != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN vp_racine3 % 2 <> 0 AND vp_racine3 != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN vp_racine4 % 2 <> 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_impairs 
+            FROM foret WHERE location = '{$locationsemijoueur}'");
+            $totalChiffresImpairs = $totalChiffresImpairs + $ChiffresImpairs;
+        
+        }
+
+        $countpair=0;
 
             $special = self::getObjectListFromDB( "SELECT card_location location, card_type type FROM champignon WHERE (card_type=41 OR card_type=42 OR card_type=43 OR card_type=44) AND card_location LIKE 'square%'");
             foreach($special as $square)
@@ -1178,25 +1194,14 @@ function GoalTrack()
                     $recherche2 = "minisquare_".$expodesquare[1]."_".$expodesquare[2];
                     $countpair = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE location LIKE '$recherche2%' AND player_id={$player_id}", true ));
                     
-                    
+                    $totalChiffresPairs = $totalChiffresPairs + $countpair;
                 }
                 
                 
             }
 
-            $totalChiffresPairs = $totalChiffresPairs + $ChiffresPairs;
-            
-
-            $ChiffresImpairs = self::getUniqueValueFromDB("SELECT 
-            SUM(CASE WHEN vp_racine1 % 2 <> 0 AND vp_racine1 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine2 % 2 <> 0 AND vp_racine2 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine3 % 2 <> 0 AND vp_racine3 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine4 % 2 <> 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_impairs 
-            FROM foret WHERE location = '{$locationsemijoueur}'");
-            $totalChiffresImpairs = $totalChiffresImpairs + $ChiffresImpairs;
         
-        }
-        $totalChiffresPairs = $totalChiffresPairs + $countpair;
+
         self::DbQuery( "UPDATE goal set {$numero} = {$totalChiffresPairs} WHERE card_type = 9" );
         self::DbQuery( "UPDATE goal set {$numero} = {$totalChiffresImpairs} WHERE card_type = 10" );
 
