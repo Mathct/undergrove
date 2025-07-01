@@ -9,7 +9,7 @@
  *
  * undergrove.js
  *
- * undergrove user interface script
+ * Undergrove user interface script
  * 
  * In this file, you are describing the logic of your user interface, in Javascript language.
  *
@@ -19,13 +19,13 @@ define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
     "ebg/counter",
-    "ebg/scrollmap",
+    "./modules/scrollmapWithZoom",
     "ebg/zone"
 ],
 function (dojo, declare) {
     return declare("bgagame.undergrove", ebg.core.gamegui, {
         constructor: function(){
-            console.log('undergrove constructor');
+            console.log('Undergrove constructor');
               
             this.track0 = new ebg.zone();
             this.track1 = new ebg.zone();
@@ -75,93 +75,13 @@ function (dojo, declare) {
             this.players = gamedatas.players;
 
 
-           if(!this.isSpectator){
-
-            if (this.prefs[100].value == 1)
-           {
-            const mediaQuery = window.matchMedia('(max-width: 1500px)');
-            dojo.query("#playerboard").addClass("masque");
-            var monDiv = document.getElementById("global");
-
-            function updateHeight(e) {
-                if (e.matches) {
-                    monDiv.style.height = "1420px";
+            if(!this.isSpectator){
+                if (this.prefs[100].value == 1) {
+                    dojo.query("#playerboard").addClass("masque");
                 } else {
-                    monDiv.style.height = "750px";
+                    dojo.query("#playerboard").removeClass("masque");
                 }
             }
-
-            // Première vérification immédiate :
-            updateHeight(mediaQuery);
-
-            // Écouteur d'événement pour les changements de taille :
-            mediaQuery.addEventListener('change', updateHeight);
-            
-           }
-
-           if (this.prefs[100].value == 2)
-           {
-            const mediaQuery = window.matchMedia('(max-width: 1500px)');
-            dojo.query("#playerboard").removeClass("masque");
-            var monDiv = document.getElementById("global");
-            
-                
-            var monDiv2 = document.getElementById("playerboard");
-            
-
-            function updateHeight(e) {
-                if (e.matches) {
-                    monDiv.style.height = "2060px";
-                    monDiv2.style.top = "1456px";
-                } else {
-                    monDiv.style.height = "1420px";
-                    monDiv2.style.top = "780px";
-                }
-            }
-
-            // Première vérification immédiate :
-            updateHeight(mediaQuery);
-
-            // Écouteur d'événement pour les changements de taille :
-            mediaQuery.addEventListener('change', updateHeight);
-
-           }}
-
-        
-
-           if(this.isSpectator)
-           {
-            const mediaQuery = window.matchMedia('(max-width: 1500px)');
-            
-           
-
-            function updateHeight(e) {
-                if (e.matches) {
-                var monDiv3 = document.getElementById("global2");
-                monDiv3.style.top = "500px";
-                var monDiv4 = document.getElementById("global");
-                monDiv4.style.height = "1230px";
-
-                } 
-                else{
-                    var monDiv3 = document.getElementById("global2");
-                    monDiv3.style.top = "-120px";
-                    var monDiv4 = document.getElementById("global");
-                    monDiv4.style.height = "750px";
-                }
-            }
-
-            // Première vérification immédiate :
-            updateHeight(mediaQuery);
-
-            // Écouteur d'événement pour les changements de taille :
-            mediaQuery.addEventListener('change', updateHeight);
-
-           }
-
-
-
-
 
             this.track0.create( this, 'track0', 20, 20 );
             this.track0.setPattern( 'horizontalfit' );
@@ -192,21 +112,19 @@ function (dojo, declare) {
             this.track13.create( this, 'track13', 20, 20 );
             this.track13.setPattern( 'horizontalfit' );
 
-
-            
-
-
-            this.scrollmap = new ebg.scrollmap(); // declare an object (this can also go in constructor)
-            // Make map scrollable        	
+            this.scrollmap = new ebg.scrollmapWithZoom(); // declare an object (this can also go in constructor)
+            this.scrollmap.maxZoom = 3;
+            this.scrollmap.minZoom = 0.1;
+            this.scrollmap.adaptHeightCorrDivs = [$("global2")];
+            this.scrollmap.bAdaptHeightAuto = true;
+            this.scrollmap.bIncrHeightBtnVisible = true;
+            // this.scrollmap.bAdaptHeightAutoCompensatePanelsHeight = true;
+            this.scrollmap.btnsDivOnMap = false;
+            this.scrollmap.btnsDivPositionOutsideMap = ebg.scrollmapWithZoom.btnsDivPositionE.Right/* + ' ' +ebg.scrollmapWithZoom.btnsDivPositionE.Center*/;	
             this.scrollmap.create( $('map_container'),$('map_scrollable'),$('map_surface'),$('map_scrollable_oversurface') ); // use ids from template
             this.scrollmap.setupOnScreenArrows( 100 ); // this will hook buttons to onclick functions with 150px scroll step
 
             this.trl_zoom = 1;
-            dojo.connect($('zoomplus'), 'onclick', () => this.onZoomButton(0.2));
-            dojo.connect($('zoomminus'), 'onclick', () => this.onZoomButton(-0.2));
-            dojo.connect($('zoomcenter'), 'onclick', () => this.onZoomCenter());
-
-            
  
             if(this.isSpectator)
             {
@@ -1666,19 +1584,6 @@ function (dojo, declare) {
 //                         __/ |                                               
 //                        |___/                                                
 /////////////////////////////////////////////////////////////////////////////////  
-
-        onZoomButton: function(deltaZoom) {
-            zoom = this.trl_zoom + deltaZoom;
-            this.trl_zoom = zoom <= 0.6 ? 0.6 : zoom >= 1.6? 1.6 : zoom;  // zoom >= 1.4? 1.4 : zoom;
-            dojo.style($('map_scrollable'), 'transform', 'scale(' + this.trl_zoom + ')');
-            dojo.style($('map_scrollable_oversurface'), 'transform', 'scale(' + this.trl_zoom + ')');
-        },
-
-        onZoomCenter: function() {
-            this.scrollmap.scrollto(0, 0)
-        },
-        
-
         
         onSelect: function(evt)
             {        	 
