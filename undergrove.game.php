@@ -442,7 +442,15 @@ class undergrove extends Table
         
 
 
+        // $name1 = self::getUniqueValuefromDB("SELECT player_name FROM player WHERE player_no = 1");
+        // $name2 = self::getUniqueValuefromDB("SELECT player_name FROM player WHERE player_no = 2");
 
+        // if(($name1 == 'grisolf' || $name2 == 'grisolf')&&($name1 == 'Choupi4008' || $name2 == 'Choupi4008'))
+        // {
+        //     self::DbQuery( "UPDATE player set player_score = 0" ); 
+        //     $this->gamestate->nextState( 'end' );
+
+        // }
 
 
         return $result;
