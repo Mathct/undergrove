@@ -23,17 +23,17 @@ class Champi1 extends Champi
     {
         if ($varg1 == "N")
         {
-            self::DbQuery( "UPDATE player set azote = azote + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `azote` = `azote` + 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "P")
         {
-            self::DbQuery( "UPDATE player set phosphore = phosphore + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` + 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "K")
         {
-            self::DbQuery( "UPDATE player set potassium = potassium + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `potassium` = `potassium` + 1  WHERE `player_id` = {$this->player_id}" );
         }
         undergrove::$instance->MajRessources();
         undergrove::$instance->addPendingTarget($this->player_id, "Champi1", "Champi1Step1");
@@ -48,9 +48,9 @@ class Champi1 extends Champi
         $ret['title'] = clienttranslate('${actplayer} activates a mushroom');
         $ret['titleyou'] = clienttranslate('${you} can choose your first resource to exchange');
 
-        $nbren = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id={$this->player_id}");
-        $nbrep = self::getUniqueValueFromDB("SELECT phosphore FROM player WHERE player_id={$this->player_id}");
-        $nbrek = self::getUniqueValueFromDB("SELECT potassium FROM player WHERE player_id={$this->player_id}");
+        $nbren = self::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id`={$this->player_id}");
+        $nbrep = self::getUniqueValueFromDB("SELECT `phosphore` FROM `player` WHERE `player_id`={$this->player_id}");
+        $nbrek = self::getUniqueValueFromDB("SELECT `potassium` FROM `player` WHERE `player_id`={$this->player_id}");
 
         if($nbren>=1)
         {
@@ -78,17 +78,17 @@ class Champi1 extends Champi
     {
         if ($varg1 == "N")
         {
-            self::DbQuery( "UPDATE player set azote = azote - 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `azote` = `azote` - 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "P")
         {
-            self::DbQuery( "UPDATE player set phosphore = phosphore - 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` - 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "K")
         {
-            self::DbQuery( "UPDATE player set potassium = potassium - 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `potassium` = `potassium` - 1  WHERE `player_id` = {$this->player_id}" );
         }
         undergrove::$instance->MajRessources();
         undergrove::$instance->addPendingTarget($this->player_id, "Champi1", "Champi1Step2");
@@ -118,17 +118,17 @@ class Champi1 extends Champi
     {
         if ($varg1 == "N")
         {
-            self::DbQuery( "UPDATE player set azote = azote + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `azote` = `azote` + 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "P")
         {
-            self::DbQuery( "UPDATE player set phosphore = phosphore + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` + 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "K")
         {
-            self::DbQuery( "UPDATE player set potassium = potassium + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `potassium` = `potassium` + 1  WHERE `player_id` = {$this->player_id}" );
         }
         undergrove::$instance->MajRessources();
         undergrove::$instance->addPendingTarget($this->player_id, "Champi1", "Champi1Step3");
@@ -144,9 +144,9 @@ class Champi1 extends Champi
         $ret['title'] = clienttranslate('${actplayer} activates a mushroom');
         $ret['titleyou'] = clienttranslate('${you} can choose your 2nd resources to exchange');
 
-        $nbren = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id={$this->player_id}");
-        $nbrep = self::getUniqueValueFromDB("SELECT phosphore FROM player WHERE player_id={$this->player_id}");
-        $nbrek = self::getUniqueValueFromDB("SELECT potassium FROM player WHERE player_id={$this->player_id}");
+        $nbren = self::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id`={$this->player_id}");
+        $nbrep = self::getUniqueValueFromDB("SELECT `phosphore` FROM `player` WHERE `player_id`={$this->player_id}");
+        $nbrek = self::getUniqueValueFromDB("SELECT `potassium` FROM `player` WHERE `player_id`={$this->player_id}");
 
         if($nbren>=1)
         {
@@ -173,17 +173,17 @@ class Champi1 extends Champi
     {
         if ($varg1 == "N")
         {
-            self::DbQuery( "UPDATE player set azote = azote - 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `azote` = `azote` - 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "P")
         {
-            self::DbQuery( "UPDATE player set phosphore = phosphore - 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` - 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "K")
         {
-            self::DbQuery( "UPDATE player set potassium = potassium - 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `potassium` = `potassium` - 1  WHERE `player_id` = {$this->player_id}" );
         }
         undergrove::$instance->MajRessources();
         undergrove::$instance->addPendingTarget($this->player_id, "Champi1", "Champi1Step4");
@@ -212,17 +212,17 @@ class Champi1 extends Champi
     {
         if ($varg1 == "N")
         {
-            self::DbQuery( "UPDATE player set azote = azote + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `azote` = `azote` + 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "P")
         {
-            self::DbQuery( "UPDATE player set phosphore = phosphore + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` + 1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($varg1 == "K")
         {
-            self::DbQuery( "UPDATE player set potassium = potassium + 1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `potassium` = `potassium` + 1  WHERE `player_id` = {$this->player_id}" );
         }
         undergrove::$instance->notifyAllPlayers("message",clienttranslate( '${player_name} activated ${name}' ), array(
             

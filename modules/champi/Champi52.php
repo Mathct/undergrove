@@ -13,7 +13,7 @@ class Champi52 extends Champi
        
         $listechampi =  undergrove::$instance->listechampi;
 
-        $champi = self::getObjectListFromDB( "SELECT card_id id, card_type type FROM champignon WHERE card_location LIKE 'square%' AND card_type !=52 AND card_type !=1 AND (card_type <=27 or card_type >=33)");  
+        $champi = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type` FROM `champignon` WHERE `card_location` LIKE 'square%' AND `card_type` !=52 AND `card_type` !=1 AND (`card_type` <=27 or `card_type` >=33)");  
         
         foreach ($champi as $test)
         {
@@ -31,8 +31,8 @@ class Champi52 extends Champi
     {
         $explodechampi = explode("_", $varg1);
         $id = intval($explodechampi[1]);
-        $type = self::getUniqueValueFromDB("SELECT card_type FROM champignon WHERE card_id={$id}");
-        $idcopieur = self::getUniqueValueFromDB("SELECT card_id FROM champignon WHERE card_type = 52");
+        $type = self::getUniqueValueFromDB("SELECT `card_type` FROM `champignon` WHERE `card_id`={$id}");
+        $idcopieur = self::getUniqueValueFromDB("SELECT `card_id` FROM `champignon` WHERE `card_type` = 52");
         undergrove::$instance->addPendingTarget($this->player_id, "Champi".$type, "init", "champi_".$idcopieur);
     }
 }

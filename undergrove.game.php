@@ -16,8 +16,10 @@
   *
   */
 
+use Bga\GameFramework\Components\Deck;
+use Bga\GameFramework\Table;
+use Bga\GameFramework\VisibleSystemException;
 
-require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 include('modules/Pending.php');
 include('modules/Champi.php');
 
@@ -26,6 +28,13 @@ class undergrove extends Table
 {
     public static $instance = null;
 
+    public Deck $champignon;
+    public Deck $tiles;
+    public Deck $goal;
+
+    public array $listechampi;
+    public array $action;
+    public array $finalgoal;
 
 	function __construct( )
 	{
@@ -52,21 +61,12 @@ class undergrove extends Table
         self::$instance = $this;
 
 
-        $this->champignon = self::getNew( "module.common.deck" );
-        $this->champignon->init( "champignon" );
+        $this->champignon = $this->bga->deckFactory->createDeck( "champignon" );
         $this->champignon->autoreshuffle = true;
-        $this->tiles = self::getNew( "module.common.deck" );
-        $this->tiles->init( "tiles" );
-        $this->goal = self::getNew( "module.common.deck" );
-        $this->goal->init( "goal" );
+        $this->tiles = $this->bga->deckFactory->createDeck( "tiles" );
+        $this->goal = $this->bga->deckFactory->createDeck( "goal" );
 
 	}
-	
-    protected function getGameName( )
-    {
-		// Used for translations and stuff. Please do not modify.
-        return "undergrove";
-    }	
 
     /*
         setupNewGame:
@@ -85,7 +85,7 @@ class undergrove extends Table
  
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
+        $sql = "INSERT INTO `player` (`player_id`, `player_color`, `player_canal`, `player_name`, `player_avatar`) VALUES ";
         $values = array();
         foreach( $players as $player_id => $player )
         {
@@ -127,15 +127,15 @@ class undergrove extends Table
 
         $this->champignon->createCards( $champi, 'deck' );
         
-        self::DbQuery( "UPDATE champignon set card_location = 'square_0_0' WHERE card_type = 1" );
-        self::DbQuery( "UPDATE champignon set card_location = 'square_-1_0' WHERE card_type = 2" );
-        self::DbQuery( "UPDATE champignon set card_location = 'square_1_0' WHERE card_type = 3" );
-        self::DbQuery( "UPDATE champignon set card_location = 'square_0_-1' WHERE card_type = 4" );
-        self::DbQuery( "UPDATE champignon set card_location = 'square_0_1' WHERE card_type = 5" );
-        self::DbQuery( "UPDATE champignon set carbone = 1 WHERE card_type = 2" );
-        self::DbQuery( "UPDATE champignon set carbone = 1 WHERE card_type = 3" );
-        self::DbQuery( "UPDATE champignon set carbone = 1 WHERE card_type = 4" );
-        self::DbQuery( "UPDATE champignon set carbone = 1 WHERE card_type = 5" );
+        self::DbQuery( "UPDATE `champignon` set `card_location` = 'square_0_0' WHERE `card_type` = 1" );
+        self::DbQuery( "UPDATE `champignon` set `card_location` = 'square_-1_0' WHERE `card_type` = 2" );
+        self::DbQuery( "UPDATE `champignon` set `card_location` = 'square_1_0' WHERE `card_type` = 3" );
+        self::DbQuery( "UPDATE `champignon` set `card_location` = 'square_0_-1' WHERE `card_type` = 4" );
+        self::DbQuery( "UPDATE `champignon` set `card_location` = 'square_0_1' WHERE `card_type` = 5" );
+        self::DbQuery( "UPDATE `champignon` set `carbone` = 1 WHERE `card_type` = 2" );
+        self::DbQuery( "UPDATE `champignon` set `carbone` = 1 WHERE `card_type` = 3" );
+        self::DbQuery( "UPDATE `champignon` set `carbone` = 1 WHERE `card_type` = 4" );
+        self::DbQuery( "UPDATE `champignon` set `carbone` = 1 WHERE `card_type` = 5" );
 
         $this->champignon->shuffle( 'deck' );
 
@@ -175,38 +175,38 @@ class undergrove extends Table
         $this->goal->shuffle( 'deck' );
 
         $this->goal->pickCardForLocation( 'deck', 'goal_1', 1 );
-        $testgoal1 = self::getUniqueValueFromDB("SELECT card_type FROM goal WHERE card_location = 'goal_1'");
+        $testgoal1 = self::getUniqueValueFromDB("SELECT `card_type` FROM `goal` WHERE `card_location` = 'goal_1'");
         
         if ($testgoal1 % 2 == 0) {
-            $idgoal = self::getUniqueValueFromDB("SELECT card_id FROM goal WHERE card_type = {$testgoal1}-1");
+            $idgoal = self::getUniqueValueFromDB("SELECT `card_id` FROM `goal` WHERE `card_type` = {$testgoal1}-1");
             $this->goal->moveCard( $idgoal, 'discard');
             
         } else {
-            $idgoal = self::getUniqueValueFromDB("SELECT card_id FROM goal WHERE card_type = {$testgoal1}+1");
+            $idgoal = self::getUniqueValueFromDB("SELECT `card_id` FROM `goal` WHERE `card_type` = {$testgoal1}+1");
             $this->goal->moveCard( $idgoal, 'discard');
         }
         $this->goal->shuffle( 'deck' );
 
         $this->goal->pickCardForLocation( 'deck', 'goal_2', 2 );
-        $testgoal2 = self::getUniqueValueFromDB("SELECT card_type FROM goal WHERE card_location = 'goal_2'");
+        $testgoal2 = self::getUniqueValueFromDB("SELECT `card_type` FROM `goal` WHERE `card_location` = 'goal_2'");
         if ($testgoal2 % 2 == 0) {
-            $idgoal = self::getUniqueValueFromDB("SELECT card_id FROM goal WHERE card_type = {$testgoal2}-1");
+            $idgoal = self::getUniqueValueFromDB("SELECT `card_id` FROM `goal` WHERE `card_type` = {$testgoal2}-1");
             $this->goal->moveCard( $idgoal, 'discard');
             
         } else {
-            $idgoal = self::getUniqueValueFromDB("SELECT card_id FROM goal WHERE card_type = {$testgoal2}+1");
+            $idgoal = self::getUniqueValueFromDB("SELECT `card_id` FROM `goal` WHERE `card_type` = {$testgoal2}+1");
             $this->goal->moveCard( $idgoal, 'discard');
         }
         $this->goal->shuffle( 'deck' );
 
         $this->goal->pickCardForLocation( 'deck', 'goal_3', 3 );
-        $testgoal3 = self::getUniqueValueFromDB("SELECT card_type FROM goal WHERE card_location = 'goal_3'");
+        $testgoal3 = self::getUniqueValueFromDB("SELECT `card_type` FROM `goal` WHERE `card_location` = 'goal_3'");
         if ($testgoal3 % 2 == 0) {
-            $idgoal = self::getUniqueValueFromDB("SELECT card_id FROM goal WHERE card_type = {$testgoal3}-1");
+            $idgoal = self::getUniqueValueFromDB("SELECT `card_id` FROM `goal` WHERE `card_type` = {$testgoal3}-1");
             $this->goal->moveCard( $idgoal, 'discard');
             
         } else {
-            $idgoal = self::getUniqueValueFromDB("SELECT card_id FROM goal WHERE card_type = {$testgoal3}+1");
+            $idgoal = self::getUniqueValueFromDB("SELECT `card_id` FROM `goal` WHERE `card_type` = {$testgoal3}+1");
             $this->goal->moveCard( $idgoal, 'discard');
         }
         $this->goal->shuffle( 'deck' );
@@ -229,20 +229,20 @@ class undergrove extends Table
 
         for ($i=0; $i<=1; $i++)
         {
-            self::DbQuery( "INSERT INTO foret (type, location, carbone) VALUES ('emplacement_semi', CONCAT('circle_',{$i},'_-1'), 0)" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`, `carbone`) VALUES ('emplacement_semi', CONCAT('circle_',{$i},'_-1'), 0)" );
         }
 
         for ($i=-1; $i<=2; $i++)
         {
             for ($j=0; $j<=1; $j++)
             {
-            self::DbQuery( "INSERT INTO foret (type, location, carbone) VALUES ('emplacement_semi', CONCAT('circle_',{$i},'_',{$j}), 0)" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`, `carbone`) VALUES ('emplacement_semi', CONCAT('circle_',{$i},'_',{$j}), 0)" );
             }
         }
 
         for ($i=0; $i<=1; $i++)
         {
-            self::DbQuery( "INSERT INTO foret (type, location, carbone) VALUES ('emplacement_semi', CONCAT('circle_',{$i},'_2'), 0)" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`, `carbone`) VALUES ('emplacement_semi', CONCAT('circle_',{$i},'_2'), 0)" );
         }
 
         $tableau = [
@@ -255,11 +255,11 @@ class undergrove extends Table
 
         foreach ($tableau as $i)
         {
-            self::DbQuery( "INSERT INTO foret (type, location) VALUES ('champi', CONCAT('square_', {$i[0]}, '_', {$i[1]}))" );
-            self::DbQuery( "INSERT INTO foret (type, location, sens_racine) VALUES ('emplacement_racine', CONCAT('minisquare_', {$i[0]}, '_', {$i[1]}, '_', {$i[0]}, '_', {$i[1]}), 1)" );
-            self::DbQuery( "INSERT INTO foret (type, location, sens_racine) VALUES ('emplacement_racine', CONCAT('minisquare_', {$i[0]}, '_', {$i[1]}, '_', {$i[0]}+1, '_', {$i[1]}), 2)" );
-            self::DbQuery( "INSERT INTO foret (type, location, sens_racine) VALUES ('emplacement_racine', CONCAT('minisquare_', {$i[0]}, '_', {$i[1]}, '_', {$i[0]}+1, '_', {$i[1]}+1), 3)" );
-            self::DbQuery( "INSERT INTO foret (type, location, sens_racine) VALUES ('emplacement_racine', CONCAT('minisquare_', {$i[0]}, '_', {$i[1]}, '_', {$i[0]}, '_', {$i[1]}+1), 4)" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`) VALUES ('champi', CONCAT('square_', {$i[0]}, '_', {$i[1]}))" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`, `sens_racine`) VALUES ('emplacement_racine', CONCAT('minisquare_', {$i[0]}, '_', {$i[1]}, '_', {$i[0]}, '_', {$i[1]}), 1)" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`, `sens_racine`) VALUES ('emplacement_racine', CONCAT('minisquare_', {$i[0]}, '_', {$i[1]}, '_', {$i[0]}+1, '_', {$i[1]}), 2)" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`, `sens_racine`) VALUES ('emplacement_racine', CONCAT('minisquare_', {$i[0]}, '_', {$i[1]}, '_', {$i[0]}+1, '_', {$i[1]}+1), 3)" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`, `sens_racine`) VALUES ('emplacement_racine', CONCAT('minisquare_', {$i[0]}, '_', {$i[1]}, '_', {$i[0]}, '_', {$i[1]}+1), 4)" );
 
         }
         
@@ -276,18 +276,18 @@ class undergrove extends Table
 
         foreach ($tableau2 as $j)
         {
-            self::DbQuery( "INSERT INTO foret (type, location) VALUES ('emplacement_champi', CONCAT('square_', {$j[0]}, '_', {$j[1]}))" );
+            self::DbQuery( "INSERT INTO `foret` (`type`, `location`) VALUES ('emplacement_champi', CONCAT('square_', {$j[0]}, '_', {$j[1]}))" );
         }
 
 
 
-        self::DbQuery( "INSERT INTO champispecial (type) VALUES (41)" );
-        self::DbQuery( "INSERT INTO champispecial (type) VALUES (42)" );
-        self::DbQuery( "INSERT INTO champispecial (type) VALUES (43)" );
-        self::DbQuery( "INSERT INTO champispecial (type) VALUES (44)" );
+        self::DbQuery( "INSERT INTO `champispecial` (`type`) VALUES (41)" );
+        self::DbQuery( "INSERT INTO `champispecial` (`type`) VALUES (42)" );
+        self::DbQuery( "INSERT INTO `champispecial` (`type`) VALUES (43)" );
+        self::DbQuery( "INSERT INTO `champispecial` (`type`) VALUES (44)" );
         for ($n=45; $n<=48; $n++)
         {
-            self::DbQuery( "INSERT INTO champispecial (type, score) VALUES ({$n}, 2)" );
+            self::DbQuery( "INSERT INTO `champispecial` (`type`, `score`) VALUES ({$n}, 2)" );
         }
 
 
@@ -316,6 +316,7 @@ class undergrove extends Table
 
     
         /************ End of the game initialization *****/
+        return 2;
     }
 
 /////////////////////////////////////////////////////////////////////////////////  
@@ -330,91 +331,90 @@ class undergrove extends Table
 /////////////////////////////////////////////////////////////////////////////////  
    
 
-    protected function getAllDatas()
+    protected function getAllDatas(int $currentPlayerId)
     {
                
         $result = array();
-        $current_player_id = self::getCurrentPlayerId();    // !! We must only return informations visible by this player !!
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_color color FROM player ";
+        $sql = "SELECT `player_id` `id`, `player_score` `score`, `player_color` `color` FROM `player` ";
         $result['players'] = self::getCollectionFromDb( $sql );
 
 
-        $result['champiforet'] = self::getObjectListFromDB( "SELECT card_id id, card_type type, card_location location, carbone carbone FROM champignon WHERE card_location LIKE 'square%'" );
-        $result['hand'] = self::getObjectListFromDB( "SELECT card_id id, card_type type, card_location location, card_location_arg location_arg FROM champignon WHERE card_location LIKE 'hand%'" );
-        $result['tilehand'] = self::getObjectListFromDB( "SELECT card_id id, card_type type, card_location location, card_location_arg location_arg FROM tiles WHERE card_location LIKE 'tilehand%'" );
+        $result['champiforet'] = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_location` `location`, `carbone` `carbone` FROM `champignon` WHERE `card_location` LIKE 'square%'" );
+        $result['hand'] = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_location` `location`, `card_location_arg` location_arg FROM `champignon` WHERE `card_location` LIKE 'hand%'" );
+        $result['tilehand'] = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_type` `type`, `card_location` `location`, `card_location_arg` location_arg FROM `tiles` WHERE `card_location` LIKE 'tilehand%'" );
 
         $result['ressources']= array();
         $result['ressources2']= array();
         $result['ressources3']= array();
         $result['ressources4']= array();
 
-        $listplayers = self::getObjectListFromDB("SELECT player_id id FROM player", true);
+        $listplayers = self::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true);
                  
             foreach($listplayers as $player)
         {
-            $result['ressources'][$player][] = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id = '{$player}'");
-            $result['ressources'][$player][] = self::getUniqueValueFromDB("SELECT phosphore FROM player WHERE player_id = '{$player}'");
-            $result['ressources'][$player][] = self::getUniqueValueFromDB("SELECT potassium FROM player WHERE player_id = '{$player}'");
-            $result['ressources'][$player][] = self::getUniqueValueFromDB("SELECT carbone FROM player WHERE player_id = '{$player}'");
+            $result['ressources'][$player][] = self::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['ressources'][$player][] = self::getUniqueValueFromDB("SELECT `phosphore` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['ressources'][$player][] = self::getUniqueValueFromDB("SELECT `potassium` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['ressources'][$player][] = self::getUniqueValueFromDB("SELECT `carbone` FROM `player` WHERE `player_id` = '{$player}'");
             
         }
 
         foreach($listplayers as $player)
         {
-            $result['ressources2'][$player][] = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id = '{$player}'");
-            $result['ressources2'][$player][] = self::getUniqueValueFromDB("SELECT semi FROM player WHERE player_id = '{$player}'");
-            $result['ressources2'][$player][] = self::getUniqueValueFromDB("SELECT arbre FROM player WHERE player_id = '{$player}'");
+            $result['ressources2'][$player][] = self::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['ressources2'][$player][] = self::getUniqueValueFromDB("SELECT `semi` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['ressources2'][$player][] = self::getUniqueValueFromDB("SELECT `arbre` FROM `player` WHERE `player_id` = '{$player}'");
             
             
         }
 
-            $result['ressources3'][$current_player_id][] = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id = '{$current_player_id}'");
-            $result['ressources3'][$current_player_id][] = self::getUniqueValueFromDB("SELECT phosphore FROM player WHERE player_id = '{$current_player_id}'");
-            $result['ressources3'][$current_player_id][] = self::getUniqueValueFromDB("SELECT potassium FROM player WHERE player_id = '{$current_player_id}'");
-            $result['ressources3'][$current_player_id][] = self::getUniqueValueFromDB("SELECT carbone FROM player WHERE player_id = '{$current_player_id}'");
-            $result['ressources4'][$current_player_id][] = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id = '{$current_player_id}'");
-            $result['ressources4'][$current_player_id][] = self::getUniqueValueFromDB("SELECT semi FROM player WHERE player_id = '{$current_player_id}'");
-            $result['ressources4'][$current_player_id][] = self::getUniqueValueFromDB("SELECT arbre FROM player WHERE player_id = '{$current_player_id}'");
+            $result['ressources3'][$currentPlayerId][] = self::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id` = '{$currentPlayerId}'");
+            $result['ressources3'][$currentPlayerId][] = self::getUniqueValueFromDB("SELECT `phosphore` FROM `player` WHERE `player_id` = '{$currentPlayerId}'");
+            $result['ressources3'][$currentPlayerId][] = self::getUniqueValueFromDB("SELECT `potassium` FROM `player` WHERE `player_id` = '{$currentPlayerId}'");
+            $result['ressources3'][$currentPlayerId][] = self::getUniqueValueFromDB("SELECT `carbone` FROM `player` WHERE `player_id` = '{$currentPlayerId}'");
+            $result['ressources4'][$currentPlayerId][] = self::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id` = '{$currentPlayerId}'");
+            $result['ressources4'][$currentPlayerId][] = self::getUniqueValueFromDB("SELECT `semi` FROM `player` WHERE `player_id` = '{$currentPlayerId}'");
+            $result['ressources4'][$currentPlayerId][] = self::getUniqueValueFromDB("SELECT `arbre` FROM `player` WHERE `player_id` = '{$currentPlayerId}'");
         
 
         foreach($listplayers as $player)
         {
-            $result['track'][$player][] = self::getUniqueValueFromDB("SELECT track FROM player WHERE player_id = '{$player}'");
-            $result['track'][$player][] = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$player}'");
+            $result['track'][$player][] = self::getUniqueValueFromDB("SELECT `track` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['track'][$player][] = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$player}'");
             
         }
 
 
         $result['activation']= array();
-        $listplayers = self::getObjectListFromDB("SELECT player_id id FROM player", true);
+        $listplayers = self::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true);
                  
             foreach($listplayers as $player)
         {
-            $result['activation'][$player][] = self::getUniqueValueFromDB("SELECT activation_b FROM player WHERE player_id = '{$player}'");
-            $result['activation'][$player][] = self::getUniqueValueFromDB("SELECT activation_p FROM player WHERE player_id = '{$player}'");
-            $result['activation'][$player][] = self::getUniqueValueFromDB("SELECT activation_g FROM player WHERE player_id = '{$player}'");
-            $result['activation'][$player][] = self::getUniqueValueFromDB("SELECT activation_y FROM player WHERE player_id = '{$player}'");
+            $result['activation'][$player][] = self::getUniqueValueFromDB("SELECT `activation_b` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['activation'][$player][] = self::getUniqueValueFromDB("SELECT `activation_p` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['activation'][$player][] = self::getUniqueValueFromDB("SELECT `activation_g` FROM `player` WHERE `player_id` = '{$player}'");
+            $result['activation'][$player][] = self::getUniqueValueFromDB("SELECT `activation_y` FROM `player` WHERE `player_id` = '{$player}'");
             
         }
         
   
-        $result['color'] = self::getCollectionFromDB( "SELECT player_id id, player_color color FROM player", true );
+        $result['color'] = self::getCollectionFromDB( "SELECT `player_id` `id`, `player_color` color FROM `player`", true );
 
-        $result['semi'] = self::getObjectListFromDB( "SELECT player_id id, location location, carbone carbone FROM foret WHERE type ='semi'" );
-        $result['arbre'] = self::getObjectListFromDB( "SELECT player_id id, location location FROM foret WHERE type ='arbre'" );
-        $result['semineutre'] = self::getObjectListFromDB( "SELECT player_id id, location location FROM foret WHERE type ='semi_neutre'" );
-        $result['racine'] = self::getObjectListFromDB( "SELECT player_id id, sens_racine sens, location location FROM foret WHERE type ='racine'" );
+        $result['semi'] = self::getObjectListFromDB( "SELECT `player_id` `id`, `location` `location`, `carbone` `carbone` FROM `foret` WHERE `type` ='semi'" );
+        $result['arbre'] = self::getObjectListFromDB( "SELECT `player_id` `id`, `location` `location` FROM `foret` WHERE `type` ='arbre'" );
+        $result['semineutre'] = self::getObjectListFromDB( "SELECT `player_id` `id`, `location` `location` FROM `foret` WHERE `type` ='semi_neutre'" );
+        $result['racine'] = self::getObjectListFromDB( "SELECT `player_id` `id`, `sens_racine` sens, `location` `location` FROM `foret` WHERE `type` ='racine'" );
 
-        $result['goals'] = self::getObjectListFromDB( "SELECT card_id id, card_location_arg location, card_type type FROM goal WHERE card_location != 'deck' AND card_location != 'discard'");
+        $result['goals'] = self::getObjectListFromDB( "SELECT `card_id` `id`, `card_location_arg` `location`, `card_type` `type` FROM `goal` WHERE `card_location` != 'deck' AND `card_location` != 'discard'");
 
 
-        $result['nbreplayers'][] = count(self::getObjectListFromDB("SELECT player_id id FROM player", true));
-        $result['goal_1'] = self::getCollectionFromDB( "SELECT card_location location, p1 p1, p2 p2, p3 p3, p4 p4 FROM goal WHERE card_location = 'goal_1'" );
-        $result['goal_2'] = self::getCollectionFromDB( "SELECT card_location location, p1 p1, p2 p2, p3 p3, p4 p4 FROM goal WHERE card_location = 'goal_2'" );
-        $result['goal_3'] = self::getCollectionFromDB( "SELECT card_location location, p1 p1, p2 p2, p3 p3, p4 p4 FROM goal WHERE card_location = 'goal_3'" );
+        $result['nbreplayers'][] = count(self::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true));
+        $result['goal_1'] = self::getCollectionFromDB( "SELECT `card_location` `location`, `p1` `p1`, `p2` `p2`, `p3` `p3`, `p4` `p4` FROM `goal` WHERE `card_location` = 'goal_1'" );
+        $result['goal_2'] = self::getCollectionFromDB( "SELECT `card_location` `location`, `p1` `p1`, `p2` `p2`, `p3` `p3`, `p4` `p4` FROM `goal` WHERE `card_location` = 'goal_2'" );
+        $result['goal_3'] = self::getCollectionFromDB( "SELECT `card_location` `location`, `p1` `p1`, `p2` `p2`, `p3` `p3`, `p4` `p4` FROM `goal` WHERE `card_location` = 'goal_3'" );
 
 
         $result['listechampi'] = $this->listechampi;
@@ -422,32 +422,32 @@ class undergrove extends Table
         $result['finalgoal'] = $this->finalgoal;
         
         
-        $result['champiscore2'][] = self::getUniqueValueFromDB("SELECT nbre FROM champispecial WHERE type = 41");
+        $result['champiscore2'][] = self::getUniqueValueFromDB("SELECT `nbre` FROM `champispecial` WHERE `type` = 41");
 
-        $result['champiscore4'] = self::getObjectListFromDB( "SELECT type type, nbre nbre FROM champispecial WHERE type = 42 OR type = 43 OR type = 44" );
+        $result['champiscore4'] = self::getObjectListFromDB( "SELECT `type` `type`, `nbre` `nbre` FROM `champispecial` WHERE `type` = 42 OR `type` = 43 OR `type` = 44" );
 
         /////////////////////////////////////// Scorepad////////////////////
 
-        $result['name'] = self::getObjectListFromDB( "SELECT player_name name FROM player");
+        $result['name'] = self::getObjectListFromDB( "SELECT `player_name` name FROM `player`");
 
         $result['score'] = $this->EndGame();
 
                
         ///////////////////////////////
 
-        $result['messagealerte'][] = count(self::getObjectListFromDB("SELECT final final FROM player WHERE final >= 1", true));
+        $result['messagealerte'][] = count(self::getObjectListFromDB("SELECT `final` `final` FROM `player` WHERE `final` >= 1", true));
 
 
-        $result['firstplayer'][] = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
+        $result['firstplayer'][] = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
         
 
 
-        // $name1 = self::getUniqueValuefromDB("SELECT player_name FROM player WHERE player_no = 1");
-        // $name2 = self::getUniqueValuefromDB("SELECT player_name FROM player WHERE player_no = 2");
+        // $name1 = self::getUniqueValuefromDB("SELECT `player_name` FROM `player` WHERE `player_no` = 1");
+        // $name2 = self::getUniqueValuefromDB("SELECT `player_name` FROM `player` WHERE `player_no` = 2");
 
         // if(($name1 == 'grisolf' || $name2 == 'grisolf')&&($name1 == 'Choupi4008' || $name2 == 'Choupi4008'))
         // {
-        //     self::DbQuery( "UPDATE player set player_score = 0" ); 
+        //     self::DbQuery( "UPDATE `player` set `player_score` = 0" ); 
         //     $this->gamestate->nextState( 'end' );
 
         // }
@@ -471,7 +471,7 @@ class undergrove extends Table
     {
         // TODO: compute and return the game progression
         $track = array();
-        $track = self::getObjectListFromDB( "SELECT track track FROM player", true );
+        $track = self::getObjectListFromDB( "SELECT `track` `track` FROM `player`", true );
         $valeurMax = max($track);
         if ($valeurMax<=8)
         {
@@ -497,18 +497,18 @@ class undergrove extends Table
 
 
 function addPending($player_id, $function, $arg = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL) {
-    $sql = "INSERT INTO pending (player_id, function, arg, arg2, arg3, arg4) VALUES (".$player_id.", '".$function."', '".$arg."', '".$arg2."', '".$arg3."', '".$arg4."')";
+    $sql = "INSERT INTO `pending` (`player_id`, `function`, `arg`, `arg2`, `arg3`, `arg4`) VALUES (".$player_id.", '".$function."', '".$arg."', '".$arg2."', '".$arg3."', '".$arg4."')";
     self::DbQuery( $sql );
 }
 
 function addPendingTarget($player_id, $function, $target, $arg = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL) {
-    $sql = "INSERT INTO pending (player_id, function, target, arg, arg2, arg3, arg4) VALUES (".$player_id.", '".$function."', '".$target."', '".$arg."', '".$arg2."', '".$arg3."', '".$arg4."')";
+    $sql = "INSERT INTO `pending` (`player_id`, `function`, `target`, `arg`, `arg2`, `arg3`, `arg4`) VALUES (".$player_id.", '".$function."', '".$target."', '".$arg."', '".$arg2."', '".$arg3."', '".$arg4."')";
     self::DbQuery( $sql );
 }
 
 function addPendingFirst($player_id, $function, $arg = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL) {
-    $minid = self::getUniqueValueFromDB( "select min(id) from pending")-1;
-    $sql = "INSERT INTO pending (id, player_id, function, arg, arg2) VALUES (".$minid.",".$player_id.", '".$function."', '".$arg."', '".$arg2."')";
+    $minid = self::getUniqueValueFromDB( "select min(`id`) from `pending`")-1;
+    $sql = "INSERT INTO `pending` (`id`, `player_id`, `function`, `arg`, `arg2`) VALUES (".$minid.",".$player_id.", '".$function."', '".$arg."', '".$arg2."')";
     self::DbQuery( $sql );
 }
 
@@ -540,9 +540,9 @@ function getPlayerRelativePositions()  // permet de mettre dans view.php les jou
 
 function MajRessources ()
     {
-        $newsressources = self::getCollectionFromDB( "SELECT player_id id, azote azote, phosphore phosphore, potassium potassium, carbone carbone, activation_b activation_b, activation_p activation_p, activation_g activation_g, activation_y activation_y, racine racine, semi semi, arbre arbre FROM player" );
-        $newscarbonesemi = self::getCollectionFromDB( "SELECT id id, player_id player, location location, carbone carbone FROM foret WHERE type = 'semi'" );
-        $newscarboneschampi = self::getCollectionFromDB( "SELECT card_id id, carbone carbone FROM champignon WHERE card_location LIKE 'square%' AND card_location != 'square_0_0' AND card_type != 28 AND card_type != 29 AND card_type != 30 AND card_type != 31 AND card_type != 32 AND card_type != 19 AND card_type != 20 AND card_type != 21 AND card_type != 22 AND card_type != 45 AND card_type != 46 AND card_type != 47 AND card_type != 48 AND card_type != 49");
+        $newsressources = self::getCollectionFromDB( "SELECT `player_id` `id`, `azote` `azote`, `phosphore` `phosphore`, `potassium` `potassium`, `carbone` `carbone`, `activation_b` `activation_b`, `activation_p` `activation_p`, `activation_g` `activation_g`, `activation_y` `activation_y`, `racine` `racine`, `semi` `semi`, `arbre` `arbre` FROM `player`" );
+        $newscarbonesemi = self::getCollectionFromDB( "SELECT `id` `id`, `player_id` `player`, `location` `location`, `carbone` `carbone` FROM `foret` WHERE `type` = 'semi'" );
+        $newscarboneschampi = self::getCollectionFromDB( "SELECT `card_id` `id`, `carbone` `carbone` FROM `champignon` WHERE `card_location` LIKE 'square%' AND `card_location` != 'square_0_0' AND `card_type` != 28 AND `card_type` != 29 AND `card_type` != 30 AND `card_type` != 31 AND `card_type` != 32 AND `card_type` != 19 AND `card_type` != 20 AND `card_type` != 21 AND `card_type` != 22 AND `card_type` != 45 AND `card_type` != 46 AND `card_type` != 47 AND `card_type` != 48 AND `card_type` != 49");
         
         undergrove::$instance->notifyAllPlayers( "majresssources", '',
                     array(
@@ -565,39 +565,39 @@ function MajRessources ()
 function GoalTrack()
     {
         $player_id = $this->getActivePlayerId();
-        $n = self::getUniqueValueFromDB("SELECT player_no FROM player WHERE player_id = '{$player_id}'");
+        $n = self::getUniqueValueFromDB("SELECT `player_no` FROM `player` WHERE `player_id` = '{$player_id}'");
         $numero = "p".$n;
         $listechampi = undergrove::$instance->listechampi;
 
         //tie-breaker
-        $aux1 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id ={$player_id} AND type = 'arbre'", true ));
-        $aux2 = self::getObjectListFromDB( "SELECT carbone carbone FROM foret WHERE player_id ={$player_id} AND type = 'semi'", true );
+        $aux1 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` ={$player_id} AND `type` = 'arbre'", true ));
+        $aux2 = self::getObjectListFromDB( "SELECT `carbone` `carbone` FROM `foret` WHERE `player_id` ={$player_id} AND `type` = 'semi'", true );
         $aux2b = array_sum($aux2);
         
         
         $score_aux= 100*$aux1 + 1*$aux2b;
-        self::DbQuery( "UPDATE player set player_score_aux = {$score_aux} WHERE player_id = '{$player_id}'" );
+        self::DbQuery( "UPDATE `player` set `player_score_aux` = {$score_aux} WHERE `player_id` = '{$player_id}'" );
 
         /////// Objectif 1
 
         if(($this->getGameStateValue('compteurcarbone') >= 6) && ($this->getGameStateValue('compteurcarbone') < 12))
         {
-            self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1  WHERE card_type = 1" );   
+            self::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1  WHERE `card_type` = 1" );   
 
         }
         if(($this->getGameStateValue('compteurcarbone') >= 12) && ($this->getGameStateValue('compteurcarbone') < 18))
         {
-            self::DbQuery( "UPDATE goal set {$numero} = {$numero} +2  WHERE card_type = 1" );   
+            self::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +2  WHERE `card_type` = 1" );   
 
         }
         if(($this->getGameStateValue('compteurcarbone') >= 18) && ($this->getGameStateValue('compteurcarbone') < 24))
         {
-            self::DbQuery( "UPDATE goal set {$numero} = {$numero} +3  WHERE card_type = 1" );   
+            self::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +3  WHERE `card_type` = 1" );   
 
         }
         if($this->getGameStateValue('compteurcarbone') >= 24)
         {
-            self::DbQuery( "UPDATE goal set {$numero} = {$numero} +4  WHERE card_type = 1" );   
+            self::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +4  WHERE `card_type` = 1" );   
 
         }
         undergrove::$instance->setGameStateValue('compteurcarbone', 0);
@@ -609,7 +609,7 @@ function GoalTrack()
 
     /*    /////// Objectif 4
         $calcul = 0;
-        $champi = self::getObjectListFromDB( "SELECT card_location location FROM champignon WHERE card_location LIKE 'square%'", true );
+        $champi = self::getObjectListFromDB( "SELECT `card_location` `location` FROM `champignon` WHERE `card_location` LIKE 'square%'", true );
         foreach ($champi as $square)
         {
             $explodesquare = explode("_", $square);
@@ -620,14 +620,14 @@ function GoalTrack()
             $loc3 = "circle_".($x+1)."_".($y+1);
             $loc4 = "circle_".($x)."_".($y+1);
 
-            $count = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+            $count = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
 
             if ($count >= 1)
             {
                 $calcul = $calcul +1;
             }
         }
-        self::DbQuery( "UPDATE goal set {$numero} = {$calcul} WHERE card_type = 4" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$calcul} WHERE `card_type` = 4" );
     */
 
         /////// Objectif 4
@@ -637,27 +637,27 @@ function GoalTrack()
         $calcul2 = 0;
         $calcul3 = 0;
         $calcul4 = 0;
-        $nbrejoueur = count((self::getObjectListFromDB( "SELECT player_id id FROM player", true )));
+        $nbrejoueur = count((self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true )));
         if($nbrejoueur ==2)
         {
-        $player_id1 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
-        $player_id2 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
+        $player_id1 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
+        $player_id2 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
         }
         if($nbrejoueur ==3)
         {
-        $player_id1 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
-        $player_id2 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
-        $player_id3 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=3");
+        $player_id1 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
+        $player_id2 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
+        $player_id3 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=3");
         }
         if($nbrejoueur ==4)
         {
-        $player_id1 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
-        $player_id2 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
-        $player_id3 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=3");
-        $player_id4 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=4");
+        $player_id1 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
+        $player_id2 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
+        $player_id3 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=3");
+        $player_id4 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=4");
         }
 
-        $champi = self::getObjectListFromDB( "SELECT card_location location FROM champignon WHERE card_location LIKE 'square%'", true );
+        $champi = self::getObjectListFromDB( "SELECT `card_location` `location` FROM `champignon` WHERE `card_location` LIKE 'square%'", true );
         foreach ($champi as $square)
         {
             $explodesquare = explode("_", $square);
@@ -671,12 +671,12 @@ function GoalTrack()
             
             if ($nbrejoueur == 2)
             {
-                $count1 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id1}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count1 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id1}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count1 >= 1)
                 {
                 $calcul1 = $calcul1 +1;
                 }
-                $count2 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id2}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count2 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id2}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count2 >= 1)
                 {
                 $calcul2 = $calcul2 +1;
@@ -685,17 +685,17 @@ function GoalTrack()
 
             if ($nbrejoueur == 3)
             {
-                $count1 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id1}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count1 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id1}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count1 >= 1)
                 {
                 $calcul1 = $calcul1 +1;
                 }
-                $count2 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id2}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count2 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id2}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count2 >= 1)
                 {
                 $calcul2 = $calcul2 +1;
                 }
-                $count3 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id3}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count3 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id3}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count3 >= 1)
                 {
                 $calcul3 = $calcul3 +1;
@@ -703,22 +703,22 @@ function GoalTrack()
             }
             if ($nbrejoueur == 4)
             {
-                $count1 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id1}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count1 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id1}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count1 >= 1)
                 {
                 $calcul1 = $calcul1 +1;
                 }
-                $count2 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id2}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count2 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id2}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count2 >= 1)
                 {
                 $calcul2 = $calcul2 +1;
                 }
-                $count3 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id3}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count3 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id3}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count3 >= 1)
                 {
                 $calcul3 = $calcul3 +1;
                 }
-                $count4 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id4}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count4 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id4}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count4 >= 1)
                 {
                 $calcul4 = $calcul4 +1;
@@ -727,11 +727,11 @@ function GoalTrack()
         }
             
         
-        $emplacementgoal = self::getUniqueValueFromDB("SELECT card_location FROM goal WHERE card_type = 4");
-        self::DbQuery( "UPDATE goal set p1 = {$calcul1} WHERE card_type = 4" );
-        self::DbQuery( "UPDATE goal set p2 = {$calcul2} WHERE card_type = 4" );
-        self::DbQuery( "UPDATE goal set p3 = {$calcul3} WHERE card_type = 4" );
-        self::DbQuery( "UPDATE goal set p4 = {$calcul4} WHERE card_type = 4" );
+        $emplacementgoal = self::getUniqueValueFromDB("SELECT `card_location` FROM `goal` WHERE `card_type` = 4");
+        self::DbQuery( "UPDATE `goal` set `p1` = {$calcul1} WHERE `card_type` = 4" );
+        self::DbQuery( "UPDATE `goal` set `p2` = {$calcul2} WHERE `card_type` = 4" );
+        self::DbQuery( "UPDATE `goal` set `p3` = {$calcul3} WHERE `card_type` = 4" );
+        self::DbQuery( "UPDATE `goal` set `p4` = {$calcul4} WHERE `card_type` = 4" );
         if(($emplacementgoal!='deck')&&($emplacementgoal!='discard'))
         {
         undergrove::$instance->notifyAllPlayers("scoregoal4",'', array(
@@ -749,18 +749,18 @@ function GoalTrack()
         );
         }
         /////// Objectif 5 
-        $arbre = self::getUniqueValueFromDB("SELECT arbre FROM player WHERE player_id = '{$player_id}'");
-        self::DbQuery( "UPDATE goal set {$numero} = 4-{$arbre} WHERE card_type = 5" );
+        $arbre = self::getUniqueValueFromDB("SELECT `arbre` FROM `player` WHERE `player_id` = '{$player_id}'");
+        self::DbQuery( "UPDATE `goal` set {$numero} = 4-{$arbre} WHERE `card_type` = 5" );
 
         /////// Objectif 6 
         $calcul = 0;
-        $semi = self::getObjectListFromDB( "SELECT location location FROM foret WHERE (type = 'semi' OR type ='arbre') AND player_id = '{$player_id}'", true );
+        $semi = self::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE (`type` = 'semi' OR `type` ='arbre') AND `player_id` = '{$player_id}'", true );
         foreach ($semi as $circle)
         {
             $explodecircle = explode("_", $circle);
             $test = "\_".$explodecircle[1]."\_".$explodecircle[2];
             
-            $count = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id}' AND type = 'racine' AND location LIKE '%$test'", true));
+            $count = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id}' AND `type` = 'racine' AND `location` LIKE '%$test'", true));
             
 
             if ($count >= 2)
@@ -768,11 +768,11 @@ function GoalTrack()
                 $calcul = $calcul +1;
             }
         }
-        self::DbQuery( "UPDATE goal set {$numero} = {$calcul} WHERE card_type = 6" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$calcul} WHERE `card_type` = 6" );
 
         /////// Objectif 7
-        $racine = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id = '{$player_id}'");
-        self::DbQuery( "UPDATE goal set {$numero} = 18-{$racine} WHERE card_type = 7" );
+        $racine = self::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id` = '{$player_id}'");
+        self::DbQuery( "UPDATE `goal` set {$numero} = 18-{$racine} WHERE `card_type` = 7" );
 
         /////// Objectif 8
 
@@ -790,7 +790,7 @@ function GoalTrack()
         $nbacty = $listechampi[$test1]["coutay"] + $listechampi[$test2]["coutay"] +$listechampi[$test3]["coutay"];
         if (($nbactb >= 2) || ($nbactp >= 2) || ($nbactg >= 2) || ($nbacty >= 2))
             {
-                self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1 WHERE card_type = 8" );
+                self::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1 WHERE `card_type` = 8" );
             }
         
         }
@@ -805,7 +805,7 @@ function GoalTrack()
         
         if (($nbactb >= 2) || ($nbactp >= 2) || ($nbactg >= 2) || ($nbacty >= 2))
             {
-                self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1 WHERE card_type = 8" );
+                self::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1 WHERE `card_type` = 8" );
             }
         
         }
@@ -815,7 +815,7 @@ function GoalTrack()
 
         /////// Objectif 9 et 10
 
-        $semijoueur = self::getObjectListFromDB( "SELECT location location FROM foret WHERE (type = 'semi' OR type = 'arbre') AND player_id = '{$player_id}'", true );
+        $semijoueur = self::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE (`type` = 'semi' OR `type` = 'arbre') AND `player_id` = '{$player_id}'", true );
         $totalChiffresPairs = 0;
         $totalChiffresImpairs = 0;
 
@@ -826,33 +826,33 @@ function GoalTrack()
             
             
             $ChiffresPairs = self::getUniqueValueFromDB("SELECT 
-            SUM(CASE WHEN vp_racine1 % 2 = 0 AND vp_racine1 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine2 % 2 = 0 AND vp_racine2 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine3 % 2 = 0 AND vp_racine3 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine4 % 2 = 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_pairs 
-            FROM foret WHERE location = '{$locationsemijoueur}'");
+            SUM(CASE WHEN `vp_racine1` % 2 = 0 AND `vp_racine1` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine2` % 2 = 0 AND `vp_racine2` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine3` % 2 = 0 AND `vp_racine3` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine4` % 2 = 0 AND `vp_racine4` != 0 THEN 1 ELSE 0 END) AS chiffres_pairs 
+            FROM `foret` WHERE `location` = '{$locationsemijoueur}'");
            
            
             $totalChiffresPairs = $totalChiffresPairs + $ChiffresPairs;
             
 
             $ChiffresImpairs = self::getUniqueValueFromDB("SELECT 
-            SUM(CASE WHEN vp_racine1 % 2 <> 0 AND vp_racine1 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine2 % 2 <> 0 AND vp_racine2 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine3 % 2 <> 0 AND vp_racine3 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine4 % 2 <> 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_impairs 
-            FROM foret WHERE location = '{$locationsemijoueur}'");
+            SUM(CASE WHEN `vp_racine1` % 2 <> 0 AND `vp_racine1` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine2` % 2 <> 0 AND `vp_racine2` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine3` % 2 <> 0 AND `vp_racine3` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine4` % 2 <> 0 AND `vp_racine4` != 0 THEN 1 ELSE 0 END) AS chiffres_impairs 
+            FROM `foret` WHERE `location` = '{$locationsemijoueur}'");
             $totalChiffresImpairs = $totalChiffresImpairs + $ChiffresImpairs;
         
         }
 
         $countpair=0;
 
-            $special = self::getObjectListFromDB( "SELECT card_location location, card_type type FROM champignon WHERE (card_type=41 OR card_type=42 OR card_type=43 OR card_type=44) AND card_location LIKE 'square%'");
+            $special = self::getObjectListFromDB( "SELECT `card_location` `location`, `card_type` `type` FROM `champignon` WHERE (`card_type`=41 OR `card_type`=42 OR `card_type`=43 OR `card_type`=44) AND `card_location` LIKE 'square%'");
             foreach($special as $square)
             { 
                 
-                $recherche = self::getUniqueValueFromDB("SELECT score FROM champispecial WHERE type = {$square['type']}");
+                $recherche = self::getUniqueValueFromDB("SELECT `score` FROM `champispecial` WHERE `type` = {$square['type']}");
                 
                 if($recherche == 0)
                 {
@@ -860,7 +860,7 @@ function GoalTrack()
                     $expodesquare = explode ("_",$square['location']);
                 
                     $recherche2 = "minisquare_".$expodesquare[1]."_".$expodesquare[2];
-                    $countpair = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE location LIKE '$recherche2%' AND player_id={$player_id}", true ));
+                    $countpair = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `location` LIKE '$recherche2%' AND `player_id`={$player_id}", true ));
                     $totalChiffresPairs = $totalChiffresPairs + $countpair;
                     
                 }
@@ -869,19 +869,19 @@ function GoalTrack()
             }
 
         
-        self::DbQuery( "UPDATE goal set {$numero} = {$totalChiffresPairs} WHERE card_type = 9" );
-        self::DbQuery( "UPDATE goal set {$numero} = {$totalChiffresImpairs} WHERE card_type = 10" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$totalChiffresPairs} WHERE `card_type` = 9" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$totalChiffresImpairs} WHERE `card_type` = 10" );
 
         /////// Objectif 11 et 12
 
-        $racinejoueur = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'racine' AND player_id = '{$player_id}'", true );
+        $racinejoueur = self::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'racine' AND `player_id` = '{$player_id}'", true );
         $compteurcolor = 0;
         $compteuranimal = 0;
         foreach($racinejoueur as $locationracinejoueur)
         {
             $exploderacine = explode("_", $locationracinejoueur);
             $square = "square_".$exploderacine[1]."_".$exploderacine[2];
-            $type = self::getUniqueValueFromDB("SELECT card_type FROM champignon WHERE card_location = '{$square}'");
+            $type = self::getUniqueValueFromDB("SELECT `card_type` FROM `champignon` WHERE `card_location` = '{$square}'");
             if ($listechampi[$type]["color"] == 1)
             {
                 $compteurcolor = $compteurcolor + 1;
@@ -892,8 +892,8 @@ function GoalTrack()
                 $compteuranimal = $compteuranimal + 1;
             }
 
-        self::DbQuery( "UPDATE goal set {$numero} = {$compteurcolor} WHERE card_type = 11" );
-        self::DbQuery( "UPDATE goal set {$numero} = {$compteuranimal} WHERE card_type = 12" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$compteurcolor} WHERE `card_type` = 11" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$compteuranimal} WHERE `card_type` = 12" );
             
 
         }
@@ -901,9 +901,9 @@ function GoalTrack()
 
         /////// Maj des valeurs du joueur actif
 
-        $scoregoal1 = self::getUniqueValueFromDB("SELECT {$numero} FROM goal WHERE card_location = 'goal_1'");
-        $scoregoal2 = self::getUniqueValueFromDB("SELECT {$numero} FROM goal WHERE card_location = 'goal_2'");
-        $scoregoal3 = self::getUniqueValueFromDB("SELECT {$numero} FROM goal WHERE card_location = 'goal_3'");
+        $scoregoal1 = self::getUniqueValueFromDB("SELECT {$numero} FROM `goal` WHERE `card_location` = 'goal_1'");
+        $scoregoal2 = self::getUniqueValueFromDB("SELECT {$numero} FROM `goal` WHERE `card_location` = 'goal_2'");
+        $scoregoal3 = self::getUniqueValueFromDB("SELECT {$numero} FROM `goal` WHERE `card_location` = 'goal_3'");
 
         undergrove::$instance->notifyAllPlayers("scoregoal",'', array(
             
@@ -925,18 +925,18 @@ function GoalTrack()
     function GoalTrack2()    //sans l'objectif 1 juste pour NormalTurn (pour ne pas remettre a zero le compteur carbone si le joueur a utilisé un tuile bonus carbone)
     {
         $player_id = $this->getActivePlayerId();
-        $n = self::getUniqueValueFromDB("SELECT player_no FROM player WHERE player_id = '{$player_id}'");
+        $n = self::getUniqueValueFromDB("SELECT `player_no` FROM `player` WHERE `player_id` = '{$player_id}'");
         $numero = "p".$n;
         $listechampi = undergrove::$instance->listechampi;
 
         //tie-breaker
-        $aux1 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id ={$player_id} AND type = 'arbre'", true ));
-        $aux2 = self::getObjectListFromDB( "SELECT carbone carbone FROM foret WHERE player_id ={$player_id} AND type = 'semi'", true );
+        $aux1 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` ={$player_id} AND `type` = 'arbre'", true ));
+        $aux2 = self::getObjectListFromDB( "SELECT `carbone` `carbone` FROM `foret` WHERE `player_id` ={$player_id} AND `type` = 'semi'", true );
         $aux2b = array_sum($aux2);
         
         
         $score_aux= 100*$aux1 + 1*$aux2b;
-        self::DbQuery( "UPDATE player set player_score_aux = {$score_aux} WHERE player_id = '{$player_id}'" );
+        self::DbQuery( "UPDATE `player` set `player_score_aux` = {$score_aux} WHERE `player_id` = '{$player_id}'" );
 
         /////// Objectif 1 (supprimé de cette fonction)
 
@@ -949,7 +949,7 @@ function GoalTrack()
 
     /*    /////// Objectif 4
         $calcul = 0;
-        $champi = self::getObjectListFromDB( "SELECT card_location location FROM champignon WHERE card_location LIKE 'square%'", true );
+        $champi = self::getObjectListFromDB( "SELECT `card_location` `location` FROM `champignon` WHERE `card_location` LIKE 'square%'", true );
         foreach ($champi as $square)
         {
             $explodesquare = explode("_", $square);
@@ -960,14 +960,14 @@ function GoalTrack()
             $loc3 = "circle_".($x+1)."_".($y+1);
             $loc4 = "circle_".($x)."_".($y+1);
 
-            $count = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+            $count = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
 
             if ($count >= 1)
             {
                 $calcul = $calcul +1;
             }
         }
-        self::DbQuery( "UPDATE goal set {$numero} = {$calcul} WHERE card_type = 4" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$calcul} WHERE `card_type` = 4" );
     */
 
         /////// Objectif 4
@@ -977,27 +977,27 @@ function GoalTrack()
         $calcul2 = 0;
         $calcul3 = 0;
         $calcul4 = 0;
-        $nbrejoueur = count((self::getObjectListFromDB( "SELECT player_id id FROM player", true )));
+        $nbrejoueur = count((self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true )));
         if($nbrejoueur ==2)
         {
-        $player_id1 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
-        $player_id2 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
+        $player_id1 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
+        $player_id2 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
         }
         if($nbrejoueur ==3)
         {
-        $player_id1 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
-        $player_id2 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
-        $player_id3 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=3");
+        $player_id1 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
+        $player_id2 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
+        $player_id3 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=3");
         }
         if($nbrejoueur ==4)
         {
-        $player_id1 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
-        $player_id2 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
-        $player_id3 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=3");
-        $player_id4 = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=4");
+        $player_id1 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
+        $player_id2 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
+        $player_id3 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=3");
+        $player_id4 = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=4");
         }
 
-        $champi = self::getObjectListFromDB( "SELECT card_location location FROM champignon WHERE card_location LIKE 'square%'", true );
+        $champi = self::getObjectListFromDB( "SELECT `card_location` `location` FROM `champignon` WHERE `card_location` LIKE 'square%'", true );
         foreach ($champi as $square)
         {
             $explodesquare = explode("_", $square);
@@ -1011,12 +1011,12 @@ function GoalTrack()
             
             if ($nbrejoueur == 2)
             {
-                $count1 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id1}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count1 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id1}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count1 >= 1)
                 {
                 $calcul1 = $calcul1 +1;
                 }
-                $count2 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id2}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count2 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id2}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count2 >= 1)
                 {
                 $calcul2 = $calcul2 +1;
@@ -1025,17 +1025,17 @@ function GoalTrack()
 
             if ($nbrejoueur == 3)
             {
-                $count1 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id1}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count1 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id1}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count1 >= 1)
                 {
                 $calcul1 = $calcul1 +1;
                 }
-                $count2 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id2}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count2 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id2}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count2 >= 1)
                 {
                 $calcul2 = $calcul2 +1;
                 }
-                $count3 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id3}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count3 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id3}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count3 >= 1)
                 {
                 $calcul3 = $calcul3 +1;
@@ -1043,22 +1043,22 @@ function GoalTrack()
             }
             if ($nbrejoueur == 4)
             {
-                $count1 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id1}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count1 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id1}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count1 >= 1)
                 {
                 $calcul1 = $calcul1 +1;
                 }
-                $count2 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id2}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count2 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id2}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count2 >= 1)
                 {
                 $calcul2 = $calcul2 +1;
                 }
-                $count3 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id3}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count3 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id3}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count3 >= 1)
                 {
                 $calcul3 = $calcul3 +1;
                 }
-                $count4 = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id4}' AND (location = '{$loc1}' OR location = '{$loc2}' OR location = '{$loc3}' OR location = '{$loc4}')", true ));
+                $count4 = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id4}' AND (`location` = '{$loc1}' OR `location` = '{$loc2}' OR `location` = '{$loc3}' OR `location` = '{$loc4}')", true ));
                 if ($count4 >= 1)
                 {
                 $calcul4 = $calcul4 +1;
@@ -1067,11 +1067,11 @@ function GoalTrack()
         }
             
         
-        $emplacementgoal = self::getUniqueValueFromDB("SELECT card_location FROM goal WHERE card_type = 4");
-        self::DbQuery( "UPDATE goal set p1 = {$calcul1} WHERE card_type = 4" );
-        self::DbQuery( "UPDATE goal set p2 = {$calcul2} WHERE card_type = 4" );
-        self::DbQuery( "UPDATE goal set p3 = {$calcul3} WHERE card_type = 4" );
-        self::DbQuery( "UPDATE goal set p4 = {$calcul4} WHERE card_type = 4" );
+        $emplacementgoal = self::getUniqueValueFromDB("SELECT `card_location` FROM `goal` WHERE `card_type` = 4");
+        self::DbQuery( "UPDATE `goal` set `p1` = {$calcul1} WHERE `card_type` = 4" );
+        self::DbQuery( "UPDATE `goal` set `p2` = {$calcul2} WHERE `card_type` = 4" );
+        self::DbQuery( "UPDATE `goal` set `p3` = {$calcul3} WHERE `card_type` = 4" );
+        self::DbQuery( "UPDATE `goal` set `p4` = {$calcul4} WHERE `card_type` = 4" );
         if(($emplacementgoal!='deck')&&($emplacementgoal!='discard'))
         {
         undergrove::$instance->notifyAllPlayers("scoregoal4",'', array(
@@ -1089,18 +1089,18 @@ function GoalTrack()
         );
         }
         /////// Objectif 5 
-        $arbre = self::getUniqueValueFromDB("SELECT arbre FROM player WHERE player_id = '{$player_id}'");
-        self::DbQuery( "UPDATE goal set {$numero} = 4-{$arbre} WHERE card_type = 5" );
+        $arbre = self::getUniqueValueFromDB("SELECT `arbre` FROM `player` WHERE `player_id` = '{$player_id}'");
+        self::DbQuery( "UPDATE `goal` set {$numero} = 4-{$arbre} WHERE `card_type` = 5" );
 
         /////// Objectif 6 
         $calcul = 0;
-        $semi = self::getObjectListFromDB( "SELECT location location FROM foret WHERE (type = 'semi' OR type ='arbre') AND player_id = '{$player_id}'", true );
+        $semi = self::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE (`type` = 'semi' OR `type` ='arbre') AND `player_id` = '{$player_id}'", true );
         foreach ($semi as $circle)
         {
             $explodecircle = explode("_", $circle);
             $test = "\_".$explodecircle[1]."\_".$explodecircle[2];
             
-            $count = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE player_id = '{$player_id}' AND type = 'racine' AND location LIKE '%$test'", true));
+            $count = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `player_id` = '{$player_id}' AND `type` = 'racine' AND `location` LIKE '%$test'", true));
             
 
             if ($count >= 2)
@@ -1108,11 +1108,11 @@ function GoalTrack()
                 $calcul = $calcul +1;
             }
         }
-        self::DbQuery( "UPDATE goal set {$numero} = {$calcul} WHERE card_type = 6" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$calcul} WHERE `card_type` = 6" );
 
         /////// Objectif 7
-        $racine = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id = '{$player_id}'");
-        self::DbQuery( "UPDATE goal set {$numero} = 18-{$racine} WHERE card_type = 7" );
+        $racine = self::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id` = '{$player_id}'");
+        self::DbQuery( "UPDATE `goal` set {$numero} = 18-{$racine} WHERE `card_type` = 7" );
 
         /////// Objectif 8
 
@@ -1130,7 +1130,7 @@ function GoalTrack()
         $nbacty = $listechampi[$test1]["coutay"] + $listechampi[$test2]["coutay"] +$listechampi[$test3]["coutay"];
         if (($nbactb >= 2) || ($nbactp >= 2) || ($nbactg >= 2) || ($nbacty >= 2))
             {
-                self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1 WHERE card_type = 8" );
+                self::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1 WHERE `card_type` = 8" );
             }
         
         }
@@ -1145,7 +1145,7 @@ function GoalTrack()
         
         if (($nbactb >= 2) || ($nbactp >= 2) || ($nbactg >= 2) || ($nbacty >= 2))
             {
-                self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1 WHERE card_type = 8" );
+                self::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1 WHERE `card_type` = 8" );
             }
         
         }
@@ -1155,7 +1155,7 @@ function GoalTrack()
 
         /////// Objectif 9 et 10
 
-        $semijoueur = self::getObjectListFromDB( "SELECT location location FROM foret WHERE (type = 'semi' OR type = 'arbre') AND player_id = '{$player_id}'", true );
+        $semijoueur = self::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE (`type` = 'semi' OR `type` = 'arbre') AND `player_id` = '{$player_id}'", true );
         $totalChiffresPairs = 0;
         $totalChiffresImpairs = 0;
 
@@ -1166,33 +1166,33 @@ function GoalTrack()
             
             
             $ChiffresPairs = self::getUniqueValueFromDB("SELECT 
-            SUM(CASE WHEN vp_racine1 % 2 = 0 AND vp_racine1 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine2 % 2 = 0 AND vp_racine2 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine3 % 2 = 0 AND vp_racine3 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine4 % 2 = 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_pairs 
-            FROM foret WHERE location = '{$locationsemijoueur}'");
+            SUM(CASE WHEN `vp_racine1` % 2 = 0 AND `vp_racine1` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine2` % 2 = 0 AND `vp_racine2` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine3` % 2 = 0 AND `vp_racine3` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine4` % 2 = 0 AND `vp_racine4` != 0 THEN 1 ELSE 0 END) AS chiffres_pairs 
+            FROM `foret` WHERE `location` = '{$locationsemijoueur}'");
            
            
             $totalChiffresPairs = $totalChiffresPairs + $ChiffresPairs;
             
 
             $ChiffresImpairs = self::getUniqueValueFromDB("SELECT 
-            SUM(CASE WHEN vp_racine1 % 2 <> 0 AND vp_racine1 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine2 % 2 <> 0 AND vp_racine2 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine3 % 2 <> 0 AND vp_racine3 != 0 THEN 1 ELSE 0 END) + 
-            SUM(CASE WHEN vp_racine4 % 2 <> 0 AND vp_racine4 != 0 THEN 1 ELSE 0 END) AS chiffres_impairs 
-            FROM foret WHERE location = '{$locationsemijoueur}'");
+            SUM(CASE WHEN `vp_racine1` % 2 <> 0 AND `vp_racine1` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine2` % 2 <> 0 AND `vp_racine2` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine3` % 2 <> 0 AND `vp_racine3` != 0 THEN 1 ELSE 0 END) + 
+            SUM(CASE WHEN `vp_racine4` % 2 <> 0 AND `vp_racine4` != 0 THEN 1 ELSE 0 END) AS chiffres_impairs 
+            FROM `foret` WHERE `location` = '{$locationsemijoueur}'");
             $totalChiffresImpairs = $totalChiffresImpairs + $ChiffresImpairs;
         
         }
 
         $countpair=0;
 
-            $special = self::getObjectListFromDB( "SELECT card_location location, card_type type FROM champignon WHERE (card_type=41 OR card_type=42 OR card_type=43 OR card_type=44) AND card_location LIKE 'square%'");
+            $special = self::getObjectListFromDB( "SELECT `card_location` `location`, `card_type` `type` FROM `champignon` WHERE (`card_type`=41 OR `card_type`=42 OR `card_type`=43 OR `card_type`=44) AND `card_location` LIKE 'square%'");
             foreach($special as $square)
             { 
                 
-                $recherche = self::getUniqueValueFromDB("SELECT score FROM champispecial WHERE type = {$square['type']}");
+                $recherche = self::getUniqueValueFromDB("SELECT `score` FROM `champispecial` WHERE `type` = {$square['type']}");
                 
                 if($recherche == 0)
                 {
@@ -1200,7 +1200,7 @@ function GoalTrack()
                     $expodesquare = explode ("_",$square['location']);
                 
                     $recherche2 = "minisquare_".$expodesquare[1]."_".$expodesquare[2];
-                    $countpair = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE location LIKE '$recherche2%' AND player_id={$player_id}", true ));
+                    $countpair = count(self::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `location` LIKE '$recherche2%' AND `player_id`={$player_id}", true ));
                     
                     $totalChiffresPairs = $totalChiffresPairs + $countpair;
                 }
@@ -1210,19 +1210,19 @@ function GoalTrack()
 
         
 
-        self::DbQuery( "UPDATE goal set {$numero} = {$totalChiffresPairs} WHERE card_type = 9" );
-        self::DbQuery( "UPDATE goal set {$numero} = {$totalChiffresImpairs} WHERE card_type = 10" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$totalChiffresPairs} WHERE `card_type` = 9" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$totalChiffresImpairs} WHERE `card_type` = 10" );
 
         /////// Objectif 11 et 12
 
-        $racinejoueur = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'racine' AND player_id = '{$player_id}'", true );
+        $racinejoueur = self::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'racine' AND `player_id` = '{$player_id}'", true );
         $compteurcolor = 0;
         $compteuranimal = 0;
         foreach($racinejoueur as $locationracinejoueur)
         {
             $exploderacine = explode("_", $locationracinejoueur);
             $square = "square_".$exploderacine[1]."_".$exploderacine[2];
-            $type = self::getUniqueValueFromDB("SELECT card_type FROM champignon WHERE card_location = '{$square}'");
+            $type = self::getUniqueValueFromDB("SELECT `card_type` FROM `champignon` WHERE `card_location` = '{$square}'");
             if ($listechampi[$type]["color"] == 1)
             {
                 $compteurcolor = $compteurcolor + 1;
@@ -1233,8 +1233,8 @@ function GoalTrack()
                 $compteuranimal = $compteuranimal + 1;
             }
 
-        self::DbQuery( "UPDATE goal set {$numero} = {$compteurcolor} WHERE card_type = 11" );
-        self::DbQuery( "UPDATE goal set {$numero} = {$compteuranimal} WHERE card_type = 12" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$compteurcolor} WHERE `card_type` = 11" );
+        self::DbQuery( "UPDATE `goal` set {$numero} = {$compteuranimal} WHERE `card_type` = 12" );
             
 
         }
@@ -1242,9 +1242,9 @@ function GoalTrack()
 
         /////// Maj des valeurs du joueur actif
 
-        $scoregoal1 = self::getUniqueValueFromDB("SELECT {$numero} FROM goal WHERE card_location = 'goal_1'");
-        $scoregoal2 = self::getUniqueValueFromDB("SELECT {$numero} FROM goal WHERE card_location = 'goal_2'");
-        $scoregoal3 = self::getUniqueValueFromDB("SELECT {$numero} FROM goal WHERE card_location = 'goal_3'");
+        $scoregoal1 = self::getUniqueValueFromDB("SELECT {$numero} FROM `goal` WHERE `card_location` = 'goal_1'");
+        $scoregoal2 = self::getUniqueValueFromDB("SELECT {$numero} FROM `goal` WHERE `card_location` = 'goal_2'");
+        $scoregoal3 = self::getUniqueValueFromDB("SELECT {$numero} FROM `goal` WHERE `card_location` = 'goal_3'");
 
         undergrove::$instance->notifyAllPlayers("scoregoal",'', array(
             
@@ -1292,19 +1292,19 @@ function GoalTrack()
     function CheckEnd()
     {
         $player_id = $this->getActivePlayerId();
-        $final = self::getUniqueValueFromDB("SELECT final FROM player WHERE player_id={$player_id}");
+        $final = self::getUniqueValueFromDB("SELECT `final` FROM `player` WHERE `player_id`={$player_id}");
         
         if ((undergrove::$instance->getGameStateValue('final') == 1) && ($final == 0))
         {
-            self::DbQuery( "UPDATE player set final = 1 WHERE player_id={$player_id}" );
+            self::DbQuery( "UPDATE `player` set `final` = 1 WHERE `player_id`={$player_id}" );
                         
         }
 
         if(($final == 1)||($final == 2))
         {
-            self::DbQuery( "UPDATE player set final = 2 WHERE player_id={$player_id}" );
-            $countplayer = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
-            $countfinal = count(self::getObjectListFromDB( "SELECT player_id id FROM player WHERE final = 2", true ));
+            self::DbQuery( "UPDATE `player` set `final` = 2 WHERE `player_id`={$player_id}" );
+            $countplayer = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
+            $countfinal = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player` WHERE `final` = 2", true ));
             if ($countplayer == $countfinal)
             {
                 $this->GoalTrack();
@@ -1335,10 +1335,10 @@ function GoalTrack()
     function EndGame($end=0)
     {
         $res  = array();
-        $nbre = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
+        $nbre = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
 
-        self::DbQuery( "UPDATE player set player_score = 0" );
-        $players = self::getObjectListFromDB( "SELECT player_id id FROM player", true );
+        self::DbQuery( "UPDATE `player` set `player_score` = 0" );
+        $players = self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true );
         foreach($players as $n)
         {
             $this->setStat( 0, 'racine', $n );
@@ -1360,7 +1360,7 @@ function GoalTrack()
         
         ///////// score racine
 
-        $foret = self::getObjectListFromDB( "SELECT type type, carbone carbone, player_id id, vp_racine1 vp1, vp_racine2 vp2, vp_racine3 vp3, vp_racine4 vp4 FROM foret WHERE type = 'semi' or type ='arbre'" );
+        $foret = self::getObjectListFromDB( "SELECT `type` `type`, `carbone` `carbone`, `player_id` `id`, `vp_racine1` vp1, `vp_racine2` vp2, `vp_racine3` vp3, `vp_racine4` vp4 FROM `foret` WHERE `type` = 'semi' or `type` ='arbre'" );
         foreach($foret as $indice)
         {
             $id = $indice['id'];
@@ -1369,7 +1369,7 @@ function GoalTrack()
             {
                 
                 $vp = $indice['vp1'] + $indice['vp2'] + $indice['vp3'] + $indice['vp4'];
-                self::DbQuery( "UPDATE player set player_score = player_score + {$vp} WHERE player_id={$id}" );
+                self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp} WHERE `player_id`={$id}" );
                 $this->incStat($vp, 'racine', $id);
             }
 
@@ -1404,13 +1404,13 @@ function GoalTrack()
                     $vp = $tableau[0] + $tableau[1] + $tableau[2] + $tableau[3];
                 }
 
-                self::DbQuery( "UPDATE player set player_score = player_score + {$vp} WHERE player_id={$id}" );
+                self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp} WHERE `player_id`={$id}" );
                 $this->incStat($vp, 'racine', $id);
                 
                 
             }
 
-            $position = self::getUniqueValueFromDB("SELECT player_no FROM player WHERE player_id={$id}");
+            $position = self::getUniqueValueFromDB("SELECT `player_no` FROM `player` WHERE `player_id`={$id}");
             $tableaufinalracine[$position][] = $vp;
             $tableaufinaltotalracine[$position] = $this->getStat('racine', $id);
             
@@ -1427,7 +1427,7 @@ function GoalTrack()
 
         ///////// score bonus
 
-        $bonus = self::getObjectListFromDB( "SELECT player_id id, bonus_score bonus FROM player" );
+        $bonus = self::getObjectListFromDB( "SELECT `player_id` `id`, `bonus_score` bonus FROM `player`" );
         foreach($bonus as $indice2)
         {
             $id = $indice2['id'];
@@ -1435,11 +1435,11 @@ function GoalTrack()
 
             if($end ==1)
             {
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp} WHERE player_id={$id}" );
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp} WHERE `player_id`={$id}" );
             }
             $this->setStat($vp, 'tiles', $id);
             
-            $position = self::getUniqueValueFromDB("SELECT player_no FROM player WHERE player_id={$id}");
+            $position = self::getUniqueValueFromDB("SELECT `player_no` FROM `player` WHERE `player_id`={$id}");
             $tableaufinalbonus[$position][] = $vp;
             
         }
@@ -1453,17 +1453,17 @@ function GoalTrack()
         
         ////// score ressources
 
-        $ressource = self::getObjectListFromDB( "SELECT player_id id, carbone c, azote a, phosphore p, potassium k FROM player" );
+        $ressource = self::getObjectListFromDB( "SELECT `player_id` `id`, `carbone` c, `azote` a, `phosphore` p, `potassium` k FROM `player`" );
         foreach($ressource as $indice3)
         {
             $id = $indice3['id'];
             $vp = ($indice3['c']+$indice3['a']+$indice3['p']+$indice3['k'])/2;
             $vp = floor($vp);
 
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp} WHERE player_id={$id}" );
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp} WHERE `player_id`={$id}" );
             $this->setStat($vp, 'ressources', $id);
 
-            $position = self::getUniqueValueFromDB("SELECT player_no FROM player WHERE player_id={$id}");
+            $position = self::getUniqueValueFromDB("SELECT `player_no` FROM `player` WHERE `player_id`={$id}");
             $tableaufinalressources[$position][] = $vp;
 
         }
@@ -1477,7 +1477,7 @@ function GoalTrack()
         
         ////// score goals
         
-        $goals = self::getObjectListFromDB( "SELECT card_location goal, card_type type, p1 p1, p2 p2, p3 p3, p4 p4 FROM goal WHERE card_location = 'goal_1' or card_location = 'goal_2' or card_location = 'goal_3'" );
+        $goals = self::getObjectListFromDB( "SELECT `card_location` `goal`, `card_type` `type`, `p1` `p1`, `p2` `p2`, `p3` `p3`, `p4` `p4` FROM `goal` WHERE `card_location` = 'goal_1' or `card_location` = 'goal_2' or `card_location` = 'goal_3'" );
         foreach($goals as $indice4)
         {
             $score = array();
@@ -1645,8 +1645,8 @@ function GoalTrack()
         if ($nbre == 2)
         {
             $vp1 = $scoregoal1[0] + $scoregoal2[0] + $scoregoal3[0];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp1} WHERE player_no=1" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp1} WHERE `player_no`=1" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
             $this->setStat($scoregoal1[0], 'goal1', $id);
             $tableaufinalgoals[1][]=$scoregoal1[0];
             $this->setStat($scoregoal2[0], 'goal2', $id);
@@ -1655,8 +1655,8 @@ function GoalTrack()
             $tableaufinalgoals[1][]=$scoregoal3[0];
             $tableaufinaltotalgoals[1]=$vp1;
             $vp2 = $scoregoal1[1] + $scoregoal2[1] + $scoregoal3[1];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp2} WHERE player_no=2" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp2} WHERE `player_no`=2" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
             $this->setStat($scoregoal1[1], 'goal1', $id);
             $tableaufinalgoals[2][]=$scoregoal1[1];
             $this->setStat($scoregoal2[1], 'goal2', $id);
@@ -1670,8 +1670,8 @@ function GoalTrack()
         if ($nbre == 3)
         {
             $vp1 = $scoregoal1[0] + $scoregoal2[0] + $scoregoal3[0];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp1} WHERE player_no=1" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp1} WHERE `player_no`=1" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
             $this->setStat($scoregoal1[0], 'goal1', $id);
             $tableaufinalgoals[1][]=$scoregoal1[0];
             $this->setStat($scoregoal2[0], 'goal2', $id);
@@ -1680,8 +1680,8 @@ function GoalTrack()
             $tableaufinalgoals[1][]=$scoregoal3[0];
             $tableaufinaltotalgoals[1]=$vp1;
             $vp2 = $scoregoal1[1] + $scoregoal2[1] + $scoregoal3[1];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp2} WHERE player_no=2" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp2} WHERE `player_no`=2" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
             $this->setStat($scoregoal1[1], 'goal1', $id);
             $tableaufinalgoals[2][]=$scoregoal1[1];
             $this->setStat($scoregoal2[1], 'goal2', $id);
@@ -1690,8 +1690,8 @@ function GoalTrack()
             $tableaufinalgoals[2][]=$scoregoal3[1];
             $tableaufinaltotalgoals[2]=$vp2;
             $vp3 = $scoregoal1[2] + $scoregoal2[2] + $scoregoal3[2];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp3} WHERE player_no=3" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=3");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp3} WHERE `player_no`=3" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=3");
             $this->setStat($scoregoal1[2], 'goal1', $id);
             $tableaufinalgoals[3][]=$scoregoal1[2];
             $this->setStat($scoregoal2[2], 'goal2', $id);
@@ -1703,8 +1703,8 @@ function GoalTrack()
         if ($nbre == 4)
         {
             $vp1 = $scoregoal1[0] + $scoregoal2[0] + $scoregoal3[0];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp1} WHERE player_no=1" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=1");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp1} WHERE `player_no`=1" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=1");
             $this->setStat($scoregoal1[0], 'goal1', $id);
             $tableaufinalgoals[1][]=$scoregoal1[0];
             $this->setStat($scoregoal2[0], 'goal2', $id);
@@ -1713,8 +1713,8 @@ function GoalTrack()
             $tableaufinalgoals[1][]=$scoregoal3[0];
             $tableaufinaltotalgoals[1]=$vp1;
             $vp2 = $scoregoal1[1] + $scoregoal2[1] + $scoregoal3[1];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp2} WHERE player_no=2" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=2");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp2} WHERE `player_no`=2" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=2");
             $this->setStat($scoregoal1[1], 'goal1', $id);
             $tableaufinalgoals[2][]=$scoregoal1[1];
             $this->setStat($scoregoal2[1], 'goal2', $id);
@@ -1723,8 +1723,8 @@ function GoalTrack()
             $tableaufinalgoals[2][]=$scoregoal3[1];
             $tableaufinaltotalgoals[2]=$vp2;
             $vp3 = $scoregoal1[2] + $scoregoal2[2] + $scoregoal3[2];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp3} WHERE player_no=3" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=3");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp3} WHERE `player_no`=3" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=3");
             $this->setStat($scoregoal1[2], 'goal1', $id);
             $tableaufinalgoals[3][]=$scoregoal1[2];
             $this->setStat($scoregoal2[2], 'goal2', $id);
@@ -1733,8 +1733,8 @@ function GoalTrack()
             $tableaufinalgoals[3][]=$scoregoal3[2];
             $tableaufinaltotalgoals[3]=$vp3;
             $vp4 = $scoregoal1[3] + $scoregoal2[3] + $scoregoal3[3];
-            self::DbQuery( "UPDATE player set player_score = player_score + {$vp4} WHERE player_no=4" );
-            $id = self::getUniqueValueFromDB("SELECT player_id FROM player WHERE player_no=4");
+            self::DbQuery( "UPDATE `player` set `player_score` = `player_score` + {$vp4} WHERE `player_no`=4" );
+            $id = self::getUniqueValueFromDB("SELECT `player_id` FROM `player` WHERE `player_no`=4");
             $this->setStat($scoregoal1[3], 'goal1', $id);
             $tableaufinalgoals[4][]=$scoregoal1[3];
             $this->setStat($scoregoal2[3], 'goal2', $id);
@@ -1754,7 +1754,7 @@ function GoalTrack()
         )
         );
 
-        $tableaufinaltotal = self::getObjectListFromDB( "SELECT player_score FROM player", true );
+        $tableaufinaltotal = self::getObjectListFromDB( "SELECT `player_score` FROM `player`", true );
         undergrove::$instance->notifyAllPlayers("padtotal",'', array(
             
             'total' => $tableaufinaltotal,
@@ -1772,9 +1772,9 @@ function GoalTrack()
         $res['tableaufinaltotalgoals']=$tableaufinaltotalgoals;
         $res['tableaufinaltotal']=$tableaufinaltotal;
 
-        $newscoreplayers = self::getCollectionFromDb( "SELECT player_id, player_score FROM player", true );
+        $newscoreplayers = self::getCollectionFromDb( "SELECT `player_id`, `player_score` FROM `player`", true );
 
-        $this->notifyAllPlayers( "newscore", '',
+        $this->bga->notify->all( "newscore", '',
                     array(
     
                         'newscore' => $newscoreplayers,
@@ -1791,7 +1791,7 @@ function GoalTrack()
 
     function goal1($score)
     {
-        $nbre = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
+        $nbre = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
         $resulat = array();
         for ($i =0; $i <= $nbre-1; $i++)
         {
@@ -1820,7 +1820,7 @@ function GoalTrack()
     function goalranking($score)
     {
         $scores =array();
-        $nbre = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
+        $nbre = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
         if($nbre == 2)
         {
             $scores = [$score[0], $score[1]];
@@ -1930,7 +1930,7 @@ function GoalTrack()
 
         function goal3($score)
     {
-        $nbre = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
+        $nbre = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
         $resulat = array();
         for ($i =0; $i <= $nbre-1; $i++)
         {
@@ -1962,7 +1962,7 @@ function GoalTrack()
 
     function goal5($score)
     {
-        $nbre = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
+        $nbre = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
         $resulat = array();
         for ($i =0; $i <= $nbre-1; $i++)
         {
@@ -1990,7 +1990,7 @@ function GoalTrack()
 
     function goal6($score)
     {
-        $nbre = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
+        $nbre = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
         $resulat = array();
         for ($i =0; $i <= $nbre-1; $i++)
         {
@@ -2018,7 +2018,7 @@ function GoalTrack()
 
     function goal8($score)
     {
-        $nbre = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
+        $nbre = count(self::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
         $resulat = array();
         for ($i =0; $i <= $nbre-1; $i++)
         {
@@ -2052,9 +2052,9 @@ function actSelect($arg1)
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2065,8 +2065,8 @@ function actCancel()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "NormalTurn");
     
     $this->gamestate->nextState( 'next');
@@ -2079,8 +2079,8 @@ function actReproduce()
     self::checkAction( 'actSelect' ); 
 
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "Reproduce");
 
     $this->undoSavepoint();   
@@ -2094,8 +2094,8 @@ function actYesPlaceChampiReproduce()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "ReproducePayerChampi");
     
     $this->gamestate->nextState( 'next');
@@ -2107,8 +2107,8 @@ function actNoPlaceChampiReproduce()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "ReproduceStep1");
     
     $this->gamestate->nextState( 'next');
@@ -2121,9 +2121,9 @@ function actNobonuschampi($arg1)
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2135,8 +2135,8 @@ function actCancel2()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "ReproducePlacerChampiBonus1");
     
     $this->gamestate->nextState( 'next');
@@ -2148,8 +2148,8 @@ function actCancel3()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "PartnerPlacerChampiBonus1");
     
     $this->gamestate->nextState( 'next');
@@ -2161,8 +2161,8 @@ function actPartner()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "Partner");
 
     $this->undoSavepoint();   
@@ -2176,8 +2176,8 @@ function actYesPlaceChampiPartner()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "PartnerPayerChampi");
     
     $this->gamestate->nextState( 'next');
@@ -2189,8 +2189,8 @@ function actNoPlaceChampiPartner()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "PartnerStep1");
     
     $this->gamestate->nextState( 'next');
@@ -2205,8 +2205,8 @@ function actFindetour()
     $this->GoalTrack();
     undergrove::$instance->CheckEnd();
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPendingFirst ($pending['player_id'], "NormalTurn");
     
     
@@ -2221,7 +2221,7 @@ function actFindetour2()
     
     $this->GoalTrack();
     $player_id = $this->getActivePlayerId();
-    $player_name = self::getUniqueValueFromDB("SELECT player_name FROM player WHERE player_id={$player_id}");
+    $player_name = self::getUniqueValueFromDB("SELECT `player_name` FROM `player` WHERE `player_id`={$player_id}");
     //declenchement fin de partie
     $securite = 0;
     if (undergrove::$instance->getGameStateValue('final') == 0)
@@ -2233,10 +2233,10 @@ function actFindetour2()
         );
     $securite = 1;
     
-    $numero = self::getUniqueValueFromDB("SELECT player_no FROM player WHERE player_id={$player_id}");
+    $numero = self::getUniqueValueFromDB("SELECT `player_no` FROM `player` WHERE `player_id`={$player_id}");
     for ($i = 1; $i <= $numero; $i++)
     {
-        self::DbQuery( "UPDATE player set final = 1 WHERE player_no={$i}" );
+        self::DbQuery( "UPDATE `player` set `final` = 1 WHERE `player_no`={$i}" );
     }
     }
 
@@ -2245,8 +2245,8 @@ function actFindetour2()
     undergrove::$instance->CheckEnd();
     }
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPendingFirst ($pending['player_id'], "NormalTurn");
     
     
@@ -2259,8 +2259,8 @@ function actPhoto()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "Photo");
 
     $this->undoSavepoint();   
@@ -2274,8 +2274,8 @@ function actNoPhotoEchange()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "PhotoDiscard", 0);
     
     $this->gamestate->nextState( 'next');
@@ -2287,9 +2287,9 @@ function actYesPhotoEchange($arg1)
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     
     
     $this->gamestate->nextState( 'next');
@@ -2301,8 +2301,8 @@ function actNoPhotoEchangeSupp()
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "PhotoDiscard", 1);
     
     $this->gamestate->nextState( 'next');
@@ -2314,9 +2314,9 @@ function actYesPhotoEchangeSupp($arg1)
    
     self::checkAction( 'actSelect' );        
             
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     
     
     $this->gamestate->nextState( 'next');
@@ -2332,12 +2332,12 @@ function actValiderPhotoDiscard( $arg1, $arg2, $arg3 )
     {
     $explode = explode("_", $arg1);
     
-    $origine = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$explode[1]}");
-    $position = self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$explode[1]}");
+    $origine = self::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$explode[1]}");
+    $position = self::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$explode[1]}");
     undergrove::$instance->champignon->moveCard( $explode[1], 'discard');
     undergrove::$instance->champignon->pickCardForLocation( 'deck', $origine, $position );
-    $newid = self::getUniqueValueFromDB("SELECT card_id id FROM champignon WHERE card_location='{$origine}' AND card_location_arg={$position}");
-    $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}");
+    $newid = self::getUniqueValueFromDB("SELECT `card_id` `id` FROM `champignon` WHERE `card_location`='{$origine}' AND `card_location_arg`={$position}");
+    $type = self::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}");
 
     
 
@@ -2357,12 +2357,12 @@ function actValiderPhotoDiscard( $arg1, $arg2, $arg3 )
     {
     $explode = explode("_", $arg2);
     
-    $origine = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$explode[1]}");
-    $position = self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$explode[1]}");
+    $origine = self::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$explode[1]}");
+    $position = self::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$explode[1]}");
     undergrove::$instance->champignon->moveCard( $explode[1], 'discard');
     undergrove::$instance->champignon->pickCardForLocation( 'deck', $origine, $position );
-    $newid = self::getUniqueValueFromDB("SELECT card_id id FROM champignon WHERE card_location='{$origine}' AND card_location_arg={$position}");
-    $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}");
+    $newid = self::getUniqueValueFromDB("SELECT `card_id` `id` FROM `champignon` WHERE `card_location`='{$origine}' AND `card_location_arg`={$position}");
+    $type = self::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}");
 
 
     undergrove::$instance->notifyAllPlayers("discard",'', array(
@@ -2381,12 +2381,12 @@ function actValiderPhotoDiscard( $arg1, $arg2, $arg3 )
     {
     $explode = explode("_", $arg3);
     
-    $origine = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$explode[1]}");
-    $position = self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$explode[1]}");
+    $origine = self::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$explode[1]}");
+    $position = self::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$explode[1]}");
     undergrove::$instance->champignon->moveCard( $explode[1], 'discard');
     undergrove::$instance->champignon->pickCardForLocation( 'deck', $origine, $position );
-    $newid = self::getUniqueValueFromDB("SELECT card_id id FROM champignon WHERE card_location='{$origine}' AND card_location_arg={$position}");
-    $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}");
+    $newid = self::getUniqueValueFromDB("SELECT `card_id` `id` FROM `champignon` WHERE `card_location`='{$origine}' AND `card_location_arg`={$position}");
+    $type = self::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}");
 
 
     undergrove::$instance->notifyAllPlayers("discard",'', array(
@@ -2403,7 +2403,7 @@ function actValiderPhotoDiscard( $arg1, $arg2, $arg3 )
 
     if(($arg1 != "0") || ($arg2 != "0") || ($arg3 != "0")) 
     {
-    $this->notifyAllPlayers( 'message', '',
+    $this->bga->notify->all( 'message', '',
         array(
 
                       
@@ -2413,9 +2413,9 @@ function actValiderPhotoDiscard( $arg1, $arg2, $arg3 )
     }
           
     
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
 
@@ -2426,8 +2426,8 @@ function actValiderPhotoDiscard( $arg1, $arg2, $arg3 )
        
         self::checkAction( 'actSelect' );        
                 
-        $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-        self::DbQuery("delete from pending where id=".$pending['id']);
+        $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+        self::DbQuery("delete from `pending` where `id`=".$pending['id']);
         $this->addPending ($pending['player_id'], "Activate");
 
         $this->undoSavepoint();   
@@ -2441,8 +2441,8 @@ function actValiderPhotoDiscard( $arg1, $arg2, $arg3 )
        
         self::checkAction( 'actSelect' );        
                 
-        $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-        self::DbQuery("delete from pending where id=".$pending['id']);
+        $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+        self::DbQuery("delete from `pending` where `id`=".$pending['id']);
         $this->addPending ($pending['player_id'], "Absorb");
 
         $this->undoSavepoint();   
@@ -2456,9 +2456,9 @@ function actValiderPhotoDiscard( $arg1, $arg2, $arg3 )
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2469,9 +2469,9 @@ function actRessource($arg1)
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2482,9 +2482,9 @@ function actFindetour3($arg1)
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2501,19 +2501,19 @@ function actUndo()
     undergrove::$instance->MajRessources();
 
     $tableau = array(); 
-    $listplayers = self::getObjectListFromDB("SELECT player_id id FROM player", true);
+    $listplayers = self::getObjectListFromDB("SELECT `player_id` `id` FROM `player`", true);
     foreach($listplayers as $player)
         {
-            $tableau[$player][] = self::getUniqueValueFromDB("SELECT track FROM player WHERE player_id = '{$player}'");
-            $tableau[$player][] = self::getUniqueValueFromDB("SELECT player_color FROM player WHERE player_id = '{$player}'");
+            $tableau[$player][] = self::getUniqueValueFromDB("SELECT `track` FROM `player` WHERE `player_id` = '{$player}'");
+            $tableau[$player][] = self::getUniqueValueFromDB("SELECT `player_color` FROM `player` WHERE `player_id` = '{$player}'");
         } 
     undergrove::$instance->notifyAllPlayers("actumarqueur",'', array(
         'track' => $tableau,
     )
     );
 
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->addPending ($pending['player_id'], "NormalTurn");
     
     $this->gamestate->nextState( 'next');
@@ -2525,9 +2525,9 @@ function actBonusTile($arg1)
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2538,9 +2538,9 @@ function actPass($arg1)
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2551,9 +2551,9 @@ function actNbre($arg1)
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2564,9 +2564,9 @@ function actAction($arg1)
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true, $arg1);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');
     
@@ -2577,9 +2577,9 @@ function actConfirm()
    
     self::checkAction( 'actSelect' );        
       
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $this->callPending($pending, true);
-    self::DbQuery("delete from pending where id=".$pending['id']);
+    self::DbQuery("delete from `pending` where `id`=".$pending['id']);
     $this->giveExtraTime(self::getActivePlayerId());
     $this->gamestate->nextState( 'next');;
     
@@ -2603,7 +2603,7 @@ function actConfirm()
 function argPlayerTurn()
 {
     $arg = array();
-    $pending =  self::getObjectFromDB( "SELECT* FROM pending order by id desc limit 1");
+    $pending =  self::getObjectFromDB( "SELECT* FROM `pending` order by `id` desc limit 1");
     $arg = $this->callPending($pending, false);
 
     
@@ -2676,7 +2676,7 @@ function callPending($pending, $execute, $arg1 = null, $arg2 = null)
 
 function stPending() {
    
-   $pending =  self::getObjectFromDB( "SELECT * FROM pending order by id desc limit 1");
+   $pending =  self::getObjectFromDB( "SELECT * FROM `pending` order by `id` desc limit 1");
    if($pending == null)
    {
         //$this->endGame();
@@ -2690,7 +2690,7 @@ function stPending() {
        {
            //no args required, execute
            $this->callPending($pending, true);
-           self::DbQuery("delete from pending where id=".$pending['id']);
+           self::DbQuery("delete from `pending` where `id`=".$pending['id']);
            $this->gamestate->nextState( 'same' );  
        }
        /*else if(count($args['selectable']) + count($args['buttons']) == 1)
@@ -2704,7 +2704,7 @@ function stPending() {
            {
                $this->callPending($pending, true, $arg1);
            }
-           self::DbQuery("delete from pending where id=".$pending['id']);
+           self::DbQuery("delete from `pending` where `id`=".$pending['id']);
            $this->gamestate->nextState( 'same' );  
        }*/
        else
@@ -2738,9 +2738,9 @@ function stPending() {
             switch ($statename) {
                 default:
                     $player_id = $this->getActivePlayerId();
-                    self::DbQuery( "UPDATE player set final = 2 WHERE player_id={$player_id}" ); // score final
+                    self::DbQuery( "UPDATE `player` set `final` = 2 WHERE `player_id`={$player_id}" ); // score final
                     $this->CheckEnd();
-                    self::DbQuery("delete from pending where player_id = {$player_id}");
+                    self::DbQuery("delete from `pending` where `player_id` = {$player_id}");
                     $this->gamestate->nextState( "zombiePass" );
                 	break;
             }
@@ -2755,7 +2755,7 @@ function stPending() {
             return;
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        throw new VisibleSystemException( "Zombie mode not supported at this game state: ".$statename );
     }
     
 ///////////////////////////////////////////////////////////////////////////////// 

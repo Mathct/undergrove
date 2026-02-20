@@ -1,10 +1,36 @@
 <?php
-class Pending extends APP_GameClass
+
+use Bga\GameFramework\Table;
+
+class Pending
 {
+    public mixed $player_no;
+    public mixed $player_id;
+    public mixed $player_name;
+    public mixed $player_score;
+    public mixed $player_color;
+    public mixed $player_azote;
+    public mixed $player_phosphore;
+    public mixed $player_potassium;
+    public mixed $player_carbone;
+    public mixed $player_bonus_racine_reproduce;
+    public mixed $player_bonus_racine_partner;
+    public mixed $player_bonus_champi_reproduce;
+    public mixed $player_bonus_champi_partner;
+    public mixed $player_bonus_carbone;
+    public mixed $player_bonus_score;
+    public mixed $player_semi;
+    public mixed $player_arbre;
+    public mixed $player_racine;
+    public mixed $player_activation_b;
+    public mixed $player_activation_p;
+    public mixed $player_activation_g;
+    public mixed $player_activation_y;
+
     public function __construct($player_id)
     {
         $this->player_id = $player_id;
-        $p = self::getObjectFromDB("SELECT * FROM player WHERE player_id = {$player_id}");        
+        $p = Table::getObjectFromDB("SELECT * FROM `player` WHERE `player_id` = {$player_id}");        
         $this->player_no = $p['player_no'];
         $this->player_id = $p['player_id'];
         $this->player_name = $p['player_name'];
@@ -54,7 +80,7 @@ function argInitialTurn($parg1, $parg2)
     $ret['titleyou'] = clienttranslate('${you} must place your first seedling with your first root');
 
    
-    $ret["selectable"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_semi' AND player_id IS NULL AND (location = 'circle_0_0' OR location = 'circle_0_1' OR location = 'circle_1_0' OR location = 'circle_1_1')", true );
+    $ret["selectable"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_semi' AND `player_id` IS NULL AND (`location` = 'circle_0_0' OR `location` = 'circle_0_1' OR `location` = 'circle_1_0' OR `location` = 'circle_1_1')", true );
     
             
     return $ret;
@@ -66,21 +92,21 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
     $explode = explode("_", $varg1);
     $racine = "minisquare_0_0_".$explode[1]."_".$explode[2];
 
-    self::DbQuery( "UPDATE player set semi = semi -1  WHERE player_id = {$this->player_id}" );
-    self::DbQuery( "UPDATE foret set type = 'semi' WHERE location = '{$varg1}'" );
-    self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+    Table::DbQuery( "UPDATE `player` set `semi` = `semi` -1  WHERE `player_id` = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `foret` set `type` = 'semi' WHERE `location` = '{$varg1}'" );
+    Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
-    self::DbQuery( "UPDATE player set racine = racine -1  WHERE player_id = {$this->player_id}" );
-    self::DbQuery( "UPDATE foret set type = 'racine' WHERE location = '{$racine}'" );
-    self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$racine}'" );
+    Table::DbQuery( "UPDATE `player` set `racine` = `racine` -1  WHERE `player_id` = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `foret` set `type` = 'racine' WHERE `location` = '{$racine}'" );
+    Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$racine}'" );
 
-    $nbreplayers = count(self::getObjectListFromDB( "SELECT player_id id FROM player", true ));
-    $nbreposition = count(self::getObjectListFromDB( "SELECT type type FROM foret WHERE type = 'semi'", true ));
-    $carbone= self::getUniqueValueFromDB("SELECT carbone FROM foret WHERE location='{$varg1}'");
-    $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location='{$racine}'");
+    $nbreplayers = count(Table::getObjectListFromDB( "SELECT `player_id` `id` FROM `player`", true ));
+    $nbreposition = count(Table::getObjectListFromDB( "SELECT `type` `type` FROM `foret` WHERE `type` = 'semi'", true ));
+    $carbone= Table::getUniqueValueFromDB("SELECT `carbone` FROM `foret` WHERE `location`='{$varg1}'");
+    $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location`='{$racine}'");
 
     $numero = "p".$this->player_no;
-    self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1  WHERE card_type = 3" );   
+    Table::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1  WHERE `card_type` = 3" );   
 
     
     undergrove::$instance->notifyAllPlayers("placeinitsemi",clienttranslate( '${player_name} places the first seedling and the first root' ), array(
@@ -110,11 +136,11 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         
     if ($nbreplayers == $nbreposition)
     {
-        $tableau = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_semi' AND player_id IS NULL AND (location = 'circle_0_0' OR location = 'circle_0_1' OR location = 'circle_1_0' OR location = 'circle_1_1')", true );
+        $tableau = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_semi' AND `player_id` IS NULL AND (`location` = 'circle_0_0' OR `location` = 'circle_0_1' OR `location` = 'circle_1_0' OR `location` = 'circle_1_1')", true );
         foreach ($tableau as $valeur)
         {
-            self::DbQuery( "UPDATE foret set type = 'semi_neutre' WHERE location = '{$valeur}'" );
-            self::DbQuery( "UPDATE foret set player_id = 0 WHERE location = '{$valeur}'" );
+            Table::DbQuery( "UPDATE `foret` set `type` = 'semi_neutre' WHERE `location` = '{$valeur}'" );
+            Table::DbQuery( "UPDATE `foret` set `player_id` = 0 WHERE `location` = '{$valeur}'" );
 
             undergrove::$instance->notifyAllPlayers("placesemineutre",'', array(
             
@@ -167,7 +193,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         ///////////////////////
 
         // il faut au moins un jeton d'activation et une ressource
-        $controlesemi = count(self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'semi' AND player_id = {$this->player_id} AND carbone < 4", true ));
+        $controlesemi = count(Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'semi' AND `player_id` = {$this->player_id} AND `carbone` < 4", true ));
         if (($controlesemi >=1) && (($this->player_activation_b + $this->player_activation_p + $this->player_activation_g + $this->player_activation_y) >=1) && (($this->player_phosphore + $this->player_potassium + $this->player_azote) >= 1))
         {
             $ret['buttons'][]="Absorb";
@@ -191,14 +217,14 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $tableau = array();
         $tableau2 = array();
         $square=array();
-        $tableau["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $tableau["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
 
         foreach ($tableau["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $tableau2[]=$racine;
@@ -210,7 +236,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         {
         
         $semi=array();  
-        $semi = self::getObjectListFromDB( "SELECT location location FROM foret WHERE (type = 'semi' OR type ='arbre') AND player_id = {$this->player_id}" );
+        $semi = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE (`type` = 'semi' OR `type` ='arbre') AND `player_id` = {$this->player_id}" );
         
         foreach ($semi as $emplacement)
         {
@@ -228,7 +254,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                     $newb = $b + $j;
                     $coord = "square_".$newa."_".$newb;
                     
-                    $test = self::getUniqueValueFromDB("SELECT location FROM foret WHERE location = '{$coord}' AND type = 'emplacement_champi'");
+                    $test = Table::getUniqueValueFromDB("SELECT `location` FROM `foret` WHERE `location` = '{$coord}' AND `type` = 'emplacement_champi'");
                     if ($test != NULL)
                     {
                         $square[] = $test;
@@ -269,7 +295,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         // test Bonus tiles
         ///////////////////////
         $playertile = "tilehand_".$this->player_id;
-        $tiles = self::getObjectListFromDB( "SELECT card_location location, card_location_arg location_arg FROM tiles WHERE card_location = '{$playertile}' AND card_type_arg = 0 AND card_type <= 10");
+        $tiles = Table::getObjectListFromDB( "SELECT `card_location` `location`, `card_location_arg` location_arg FROM `tiles` WHERE `card_location` = '{$playertile}' AND `card_type_arg` = 0 AND `card_type` <= 10");
         if ($tiles !=null)
         {
             $ret['titleyou'] = clienttranslate('${you} must choose an action (you can activate a bonus tile)');
@@ -306,13 +332,13 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $arg = intval($tile[2]);
         $location = $tile[0]."_".$a;
             
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM tiles WHERE card_location = '{$location}' AND card_location_arg = {$arg}");
-        $id = self::getUniqueValueFromDB("SELECT card_id id FROM tiles WHERE card_location = '{$location}' AND card_location_arg = {$arg}");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `tiles` WHERE `card_location` = '{$location}' AND `card_location_arg` = {$arg}");
+        $id = Table::getUniqueValueFromDB("SELECT `card_id` `id` FROM `tiles` WHERE `card_location` = '{$location}' AND `card_location_arg` = {$arg}");
 
         if (($type == 1) || ($type == 2))
         {
-            self::DbQuery( "UPDATE player set azote = azote +1  WHERE player_id = {$this->player_id}" );
-            self::DbQuery( "UPDATE tiles set card_type_arg = 1  WHERE card_type = {$type}" );
+            Table::DbQuery( "UPDATE `player` set `azote` = `azote` +1  WHERE `player_id` = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `tiles` set `card_type_arg` = 1  WHERE `card_type` = {$type}" );
             undergrove::$instance->tiles->moveCard( $id, 'discard');
             undergrove::$instance->notifyAllPlayers("usebonustile",clienttranslate( '${player_name} uses a bonus tile and gains ${n}' ), array(
             
@@ -326,8 +352,8 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
 
         if (($type == 3) || ($type == 4))
         {
-            self::DbQuery( "UPDATE player set phosphore = phosphore +1  WHERE player_id = {$this->player_id}" );
-            self::DbQuery( "UPDATE tiles set card_type_arg = 1  WHERE card_type = {$type}" );
+            Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` +1  WHERE `player_id` = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `tiles` set `card_type_arg` = 1  WHERE `card_type` = {$type}" );
             undergrove::$instance->tiles->moveCard( $id, 'discard');
             undergrove::$instance->notifyAllPlayers("usebonustile",clienttranslate( '${player_name} uses a bonus tile and gains ${p}' ), array(
             
@@ -342,8 +368,8 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 
         if (($type == 5) || ($type == 6))
         {
-            self::DbQuery( "UPDATE player set potassium = potassium +1  WHERE player_id = {$this->player_id}" );
-            self::DbQuery( "UPDATE tiles set card_type_arg = 1  WHERE card_type = {$type}" );
+            Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` +1  WHERE `player_id` = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `tiles` set `card_type_arg` = 1  WHERE `card_type` = {$type}" );
             undergrove::$instance->tiles->moveCard( $id, 'discard');
             undergrove::$instance->notifyAllPlayers("usebonustile",clienttranslate( '${player_name} uses a bonus tile and gains ${k}' ), array(
             
@@ -357,12 +383,12 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
 
         if (($type == 7) || ($type == 8))
         {
-            self::DbQuery( "UPDATE player set carbone = carbone +1  WHERE player_id = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `carbone` = `carbone` +1  WHERE `player_id` = {$this->player_id}" );
 
             $compteurcarbone = undergrove::$instance->getGameStateValue('compteurcarbone') + 1;
             undergrove::$instance->setGameStateValue('compteurcarbone', $compteurcarbone);
 
-            self::DbQuery( "UPDATE tiles set card_type_arg = 1  WHERE card_type = {$type}" );
+            Table::DbQuery( "UPDATE `tiles` set `card_type_arg` = 1  WHERE `card_type` = {$type}" );
             undergrove::$instance->tiles->moveCard( $id, 'discard');
             undergrove::$instance->notifyAllPlayers("usebonustile",clienttranslate( '${player_name} uses a bonus tile and gains ${c}' ), array(
             
@@ -376,11 +402,11 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
 
         if (($type == 9) || ($type == 10))
         {
-            self::DbQuery( "UPDATE player set activation_b = 1  WHERE player_id = {$this->player_id}" );
-            self::DbQuery( "UPDATE player set activation_p = 1  WHERE player_id = {$this->player_id}" );
-            self::DbQuery( "UPDATE player set activation_g = 1  WHERE player_id = {$this->player_id}" );
-            self::DbQuery( "UPDATE player set activation_y = 1  WHERE player_id = {$this->player_id}" );
-            self::DbQuery( "UPDATE tiles set card_type_arg = 1  WHERE card_type = {$type}" );
+            Table::DbQuery( "UPDATE `player` set `activation_b` = 1  WHERE `player_id` = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `activation_p` = 1  WHERE `player_id` = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `activation_g` = 1  WHERE `player_id` = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `activation_y` = 1  WHERE `player_id` = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `tiles` set `card_type_arg` = 1  WHERE `card_type` = {$type}" );
             undergrove::$instance->tiles->moveCard( $id, 'discard');
             undergrove::$instance->notifyAllPlayers("usebonustile",clienttranslate( '${player_name} uses a bonus tile and reactivates the tokens' ), array(
             
@@ -419,9 +445,9 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $ret['title'] = clienttranslate('${actplayer} does the Reproduce action');
         
 
-        $phosphore = self::getUniqueValueFromDB("SELECT phosphore FROM player WHERE player_id={$this->player_id}") -2;
-        $azote = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id={$this->player_id}");
-        $potassium= self::getUniqueValueFromDB("SELECT potassium FROM player WHERE player_id={$this->player_id}");
+        $phosphore = Table::getUniqueValueFromDB("SELECT `phosphore` FROM `player` WHERE `player_id`={$this->player_id}") -2;
+        $azote = Table::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id`={$this->player_id}");
+        $potassium= Table::getUniqueValueFromDB("SELECT `potassium` FROM `player` WHERE `player_id`={$this->player_id}");
 
         undergrove::$instance->setGameStateValue('variable1', 0);
         undergrove::$instance->setGameStateValue('variable2', 0);
@@ -429,7 +455,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         
         
         
-        $emplacementsemi = count (self::getObjectListFromDB("SELECT id id FROM foret WHERE type='emplacement_semi'"));
+        $emplacementsemi = count (Table::getObjectListFromDB("SELECT `id` `id` FROM `foret` WHERE `type`='emplacement_semi'"));
 
         
         if ((($phosphore >=1) || ($azote >=1) || ($potassium >=1 )) && ( $emplacementsemi > 0))
@@ -454,9 +480,9 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
 
     function Reproduce($parg1, $parg2, $varg1, $varg2)
     {
-        $phosphore = self::getUniqueValueFromDB("SELECT phosphore FROM player WHERE player_id={$this->player_id}") -2;
-        $azote = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id={$this->player_id}");
-        $potassium= self::getUniqueValueFromDB("SELECT potassium FROM player WHERE player_id={$this->player_id}");
+        $phosphore = Table::getUniqueValueFromDB("SELECT `phosphore` FROM `player` WHERE `player_id`={$this->player_id}") -2;
+        $azote = Table::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id`={$this->player_id}");
+        $potassium= Table::getUniqueValueFromDB("SELECT `potassium` FROM `player` WHERE `player_id`={$this->player_id}");
         if (($phosphore == 0) && ($azote ==0) && ($potassium == 0 ))
         {
         undergrove::$instance->addPending($this->player_id, "ReproduceStep1");
@@ -516,7 +542,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $ret['title'] = clienttranslate('${actplayer} does the Reproduce action');
         $ret['titleyou'] = clienttranslate('${you} must select a mushroom');
 
-        $controle = self::getObjectListFromDB( "SELECT card_id id FROM champignon WHERE card_location LIKE CONCAT('hand_', {$this->player_id})", true );
+        $controle = Table::getObjectListFromDB( "SELECT `card_id` `id` FROM `champignon` WHERE `card_location` LIKE CONCAT('hand_', {$this->player_id})", true );
         
         foreach ($controle as $id)
         {
@@ -549,7 +575,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $ret['title'] = clienttranslate('${actplayer} does the Reproduce action');
         $ret['titleyou'] = clienttranslate('${you} must place the Mushroom');
 
-        $ret["selectable"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_champi'", true );
+        $ret["selectable"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_champi'", true );
         $ret["selected"] = array();
         $ret["selected"][] = $parg1;
         
@@ -574,19 +600,19 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         if ($parg2 == "N")
         {
         
-        self::DbQuery( "UPDATE player set azote = azote -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` -1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($parg2 == "P")
         {
         
-        self::DbQuery( "UPDATE player set phosphore = phosphore -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` -1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($parg2 == "K")
         {
         
-        self::DbQuery( "UPDATE player set potassium = potassium -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` -1  WHERE `player_id` = {$this->player_id}" );
         }
 
     /// maj de tous les elements des panneaux joueurs
@@ -595,14 +621,14 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
 
 
         $explode = explode("_", $parg1);
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$explode[1]}");
-        $origine = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$explode[1]}");
-        $position = self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$explode[1]}");
-        $carbone = self::getUniqueValueFromDB("SELECT carbone carbone FROM champignon WHERE card_id={$explode[1]}");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $origine = Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $position = Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $carbone = Table::getUniqueValueFromDB("SELECT `carbone` `carbone` FROM `champignon` WHERE `card_id`={$explode[1]}");
         undergrove::$instance->champignon->moveCard( $explode[1], $varg1);
         undergrove::$instance->champignon->pickCardForLocation( 'deck', $origine, $position );
-        $newid = self::getUniqueValueFromDB("SELECT card_id id FROM champignon WHERE card_location='{$origine}' AND card_location_arg={$position}");
-        self::DbQuery( "UPDATE champignon set card_location = 'hand'  WHERE card_id = {$newid}" );
+        $newid = Table::getUniqueValueFromDB("SELECT `card_id` `id` FROM `champignon` WHERE `card_location`='{$origine}' AND `card_location_arg`={$position}");
+        Table::DbQuery( "UPDATE `champignon` set `card_location` = 'hand'  WHERE `card_id` = {$newid}" );
         
 
 
@@ -619,7 +645,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
 
                 
         //emplacement champi devient champi
-        self::DbQuery( "UPDATE foret set type = 'champi' WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'champi' WHERE `location` = '{$varg1}'" );
 
         $this->ChampiSpecial($type, $varg1);
 
@@ -638,7 +664,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2]);
                 $newlocation = 'square_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             
         }
 
@@ -647,7 +673,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 $newx = intval($explode2[1]);
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'square_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
 
         //emplacement_semi
@@ -658,7 +684,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'circle_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location, carbone) SELECT 'emplacement_semi', '{$newlocation}', 0 WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`, `carbone`) SELECT 'emplacement_semi', '{$newlocation}', 0 WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
         }
 
@@ -676,7 +702,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'minisquare_'.$x.'_'.$y.'_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location, sens_racine) SELECT 'emplacement_racine', '{$newlocation}', '{$valeursens}'  WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`, `sens_racine`) SELECT 'emplacement_racine', '{$newlocation}', '{$valeursens}'  WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
          }
          
@@ -690,9 +716,9 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
             /*undergrove::$instance->notifyAllPlayers("hand",'', array(
             
                 'id' =>  $newid,
-                'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$newid}"),
-                'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$newid}"),
-                'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}"),
+                'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$newid}"),
+                'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$newid}"),
+                'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}"),
                 
             )
             );*/
@@ -721,7 +747,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $ret['title'] = clienttranslate('${actplayer} does the Reproduce action');
         $ret['titleyou'] = clienttranslate('${you} can select and place 2nd mushroom for free thanks to your bonus');
 
-        $controle = self::getObjectListFromDB( "SELECT card_id id FROM champignon WHERE card_location LIKE CONCAT('hand_', {$this->player_id})", true );
+        $controle = Table::getObjectListFromDB( "SELECT `card_id` `id` FROM `champignon` WHERE `card_location` LIKE CONCAT('hand_', {$this->player_id})", true );
         
         foreach ($controle as $id)
         {
@@ -747,9 +773,9 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
             /*undergrove::$instance->notifyAllPlayers("hand",'', array(
             
                 'id' =>  $parg1,
-                'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$parg1}"),
-                'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$parg1}"),
-                'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$parg1}"),
+                'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$parg1}"),
+                'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$parg1}"),
+                'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$parg1}"),
                 
             )
             ); */
@@ -778,7 +804,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $ret['title'] = clienttranslate('${actplayer} does the Reproduce action');
         $ret['titleyou'] = clienttranslate('${you} must place the mushroom');
 
-        $ret["selectable"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_champi'", true );
+        $ret["selectable"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_champi'", true );
 
         $ret["selected"] = array();
         $ret["selected"][] = $parg1;
@@ -795,14 +821,14 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         // varg1 = square destination (ce qui a été cliqué dans ce arg)
 
         $explode = explode("_", $parg1);
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$explode[1]}");
-        $origine = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$explode[1]}");
-        $position = self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$explode[1]}");
-        $carbone = self::getUniqueValueFromDB("SELECT carbone carbone FROM champignon WHERE card_id={$explode[1]}");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $origine = Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $position = Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $carbone = Table::getUniqueValueFromDB("SELECT `carbone` `carbone` FROM `champignon` WHERE `card_id`={$explode[1]}");
         undergrove::$instance->champignon->moveCard( $explode[1], $varg1);
         undergrove::$instance->champignon->pickCardForLocation( 'deck', $origine, $position );
-        $newid = self::getUniqueValueFromDB("SELECT card_id id FROM champignon WHERE card_location='{$origine}' AND card_location_arg={$position}");
-        self::DbQuery( "UPDATE champignon set card_location = 'hand'  WHERE card_id = {$newid}" );
+        $newid = Table::getUniqueValueFromDB("SELECT `card_id` `id` FROM `champignon` WHERE `card_location`='{$origine}' AND `card_location_arg`={$position}");
+        Table::DbQuery( "UPDATE `champignon` set `card_location` = 'hand'  WHERE `card_id` = {$newid}" );
 
         undergrove::$instance->notifyAllPlayers("move",clienttranslate( '${player_name} places a mushroom (bonus)' ), array(
             
@@ -816,7 +842,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         );
         
         //emplacement champi devient champi
-        self::DbQuery( "UPDATE foret set type = 'champi' WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'champi' WHERE `location` = '{$varg1}'" );
 
         $this->ChampiSpecial($type, $varg1);
 
@@ -834,7 +860,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2]);
                 $newlocation = 'square_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             
         }
 
@@ -843,7 +869,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 $newx = intval($explode2[1]);
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'square_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
 
         //emplacement_semi
@@ -854,7 +880,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'circle_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location, carbone) SELECT 'emplacement_semi', '{$newlocation}', 0 WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`, `carbone`) SELECT 'emplacement_semi', '{$newlocation}', 0 WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
         }
 
@@ -872,7 +898,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'minisquare_'.$x.'_'.$y.'_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location, sens_racine) SELECT 'emplacement_racine', '{$newlocation}', '{$valeursens}'  WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`, `sens_racine`) SELECT 'emplacement_racine', '{$newlocation}', '{$valeursens}'  WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
          }
          
@@ -880,9 +906,9 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         /*undergrove::$instance->notifyAllPlayers("hand",'', array(
             
             'id' =>  $parg2,
-            'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$parg2}"),
-            'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$parg2}"),
-            'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$parg2}"),
+            'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$parg2}"),
+            'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$parg2}"),
+            'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$parg2}"),
             
         )
         );  
@@ -890,9 +916,9 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         undergrove::$instance->notifyAllPlayers("hand",'', array(
             
             'id' =>  $newid,
-            'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$newid}"),
-            'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$newid}"),
-            'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}"),
+            'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$newid}"),
+            'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$newid}"),
+            'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}"),
             
         )
         );   */
@@ -920,7 +946,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $ret['title'] = clienttranslate('${actplayer} does the Reproduce action');
         $ret['titleyou'] = clienttranslate('${you} must choose a location for your seedling');
 
-        $ret["selectable"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_semi'", true );
+        $ret["selectable"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_semi'", true );
         
         
         if (($parg1 !="nocancel"))  
@@ -941,22 +967,22 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
     {
         // parg1 =  (ce qui a été cliqué au step précedent le varg devient parg et qui envoyé dans game.php dans la fonction d'action)
         // varg1 =  (ce qui a été cliqué dans ce arg)
-        self::DbQuery( "UPDATE player set semi = semi -1  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE foret set type = 'semi' WHERE location = '{$varg1}'" );
-        self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `player` set `semi` = `semi` -1  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'semi' WHERE `location` = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
-        self::DbQuery( "UPDATE player set phosphore = phosphore -2  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set carbone = carbone -1  WHERE player_id = {$this->player_id}" );
-        $carbone= self::getUniqueValueFromDB("SELECT carbone FROM foret WHERE location='{$varg1}'");
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` -2  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone` -1  WHERE `player_id` = {$this->player_id}" );
+        $carbone= Table::getUniqueValueFromDB("SELECT `carbone` FROM `foret` WHERE `location`='{$varg1}'");
 
 
         $explode = explode("_", $varg1);
         $filtre = "circle_".$explode[1]."_";
-        $count = count(self::getObjectListFromDB( "SELECT id id FROM foret WHERE location LIKE '$filtre%' AND player_id = {$this->player_id}", true ));
+        $count = count(Table::getObjectListFromDB( "SELECT `id` `id` FROM `foret` WHERE `location` LIKE '$filtre%' AND `player_id` = {$this->player_id}", true ));
         if ($count == 1)
         {
         $numero = "p".$this->player_no;
-        self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1  WHERE card_type = 3" );   
+        Table::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1  WHERE `card_type` = 3" );   
         }
         
 
@@ -1000,7 +1026,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $explode = explode("_", $parg1);
         $test = "\_".$explode[1]."\_".$explode[2];  // echapement des "_" pour qu'il ne les prennent pas pour des jokers
 
-        $ret["selectable"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE location LIKE '%$test' AND type = 'emplacement_racine'", true );
+        $ret["selectable"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `location` LIKE '%$test' AND `type` = 'emplacement_racine'", true );
 
         $ret['buttons'][]="Undo"; // rajouté
   
@@ -1013,7 +1039,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         // parg1 =  (ce qui a été cliqué au step précedent le varg devient parg et qui envoyé dans game.php dans la fonction d'action)
         // varg1 =  (ce qui a été cliqué dans ce arg)
 
-        $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location='{$varg1}'");
+        $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location`='{$varg1}'");
 
         undergrove::$instance->notifyAllPlayers("placeracine",clienttranslate( '${player_name} places a root' ), array(
             
@@ -1028,25 +1054,25 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $this->TestBonusPermanent($varg1);
         $this->ScoreRacine ($varg1);
 
-        self::DbQuery( "UPDATE player set racine = racine -1  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE foret set type = 'racine' WHERE location = '{$varg1}'" );
-        self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `player` set `racine` = `racine` -1  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'racine' WHERE `location` = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
         $exploderacine = explode("_", $varg1);
         $square = "square_".$exploderacine[1]."_".$exploderacine[2];
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_location = '{$square}'");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_location` = '{$square}'");
         undergrove::$instance->setGameStateValue('goalracine1', $type);
 
         /// maj de tous les elements des panneaux joueurs
         undergrove::$instance->MajRessources();
 
-        $nbracine = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id={$this->player_id}");
+        $nbracine = Table::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id`={$this->player_id}");
         
         
         $explode = explode("_", $parg1);
         $test = "\_".$explode[1]."\_".$explode[2];  // echapement des "_" pour qu'il ne les prennent pas pour des jokers
         
-        $tableau['test'] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE location LIKE '%$test' AND type = 'emplacement_racine'", true );
+        $tableau['test'] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `location` LIKE '%$test' AND `type` = 'emplacement_racine'", true );
         
 
         $emplacementracine = 0;
@@ -1096,7 +1122,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $explode = explode("_", $parg1);
         $test = "\_".$explode[1]."\_".$explode[2];  // echampement des "_" pour qu'il ne les prennent pas pour des jokers
 
-        $ret["selectable"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE location LIKE '%$test' AND type = 'emplacement_racine'", true );
+        $ret["selectable"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `location` LIKE '%$test' AND `type` = 'emplacement_racine'", true );
 
         $ret['buttons'][]="Findetour3"; 
 
@@ -1120,7 +1146,7 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
 
         else{
 
-        $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location='{$varg1}'");
+        $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location`='{$varg1}'");
 
         undergrove::$instance->notifyAllPlayers("placeracine",clienttranslate( '${player_name} places a root (bonus)' ), array(
             
@@ -1135,13 +1161,13 @@ function InitialTurn($parg1, $parg2, $varg1, $varg2)
         $this->TestBonusPermanent($varg1);
         $this->ScoreRacine ($varg1);
 
-        self::DbQuery( "UPDATE player set racine = racine -1  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE foret set type = 'racine' WHERE location = '{$varg1}'" );
-        self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `player` set `racine` = `racine` -1  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'racine' WHERE `location` = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
         $exploderacine = explode("_", $varg1);
         $square = "square_".$exploderacine[1]."_".$exploderacine[2];
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_location = '{$square}'");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_location` = '{$square}'");
         undergrove::$instance->setGameStateValue('goalracine2', $type);
 
         
@@ -1182,23 +1208,23 @@ function argPartner($parg1, $parg2)
         undergrove::$instance->setGameStateValue('variable1', 0);
         undergrove::$instance->setGameStateValue('variable2', 0);
 
-        $phosphore = self::getUniqueValueFromDB("SELECT phosphore FROM player WHERE player_id={$this->player_id}");
-        $azote = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id={$this->player_id}");
-        $potassium= self::getUniqueValueFromDB("SELECT potassium FROM player WHERE player_id={$this->player_id}")-2;
-        $carbone= self::getUniqueValueFromDB("SELECT carbone FROM player WHERE player_id={$this->player_id}") -1;
+        $phosphore = Table::getUniqueValueFromDB("SELECT `phosphore` FROM `player` WHERE `player_id`={$this->player_id}");
+        $azote = Table::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id`={$this->player_id}");
+        $potassium= Table::getUniqueValueFromDB("SELECT `potassium` FROM `player` WHERE `player_id`={$this->player_id}")-2;
+        $carbone= Table::getUniqueValueFromDB("SELECT `carbone` FROM `player` WHERE `player_id`={$this->player_id}") -1;
 
         /// test obligation placer champi
         $tableau = array();
         $tableau2 = array();
         $square=array();
-        $tableau["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $tableau["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
 
         foreach ($tableau["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $tableau2[]=$racine;
@@ -1210,7 +1236,7 @@ function argPartner($parg1, $parg2)
         {
         
         $semi=array();  
-        $semi = self::getObjectListFromDB( "SELECT location location FROM foret WHERE (type = 'semi' OR type ='arbre') AND player_id = {$this->player_id}" );
+        $semi = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE (`type` = 'semi' OR `type` ='arbre') AND `player_id` = {$this->player_id}" );
         
         foreach ($semi as $emplacement)
         {
@@ -1228,7 +1254,7 @@ function argPartner($parg1, $parg2)
                     $newb = $b + $j;
                     $coord = "square_".$newa."_".$newb;
                     
-                    $test = self::getUniqueValueFromDB("SELECT location FROM foret WHERE location = '{$coord}' AND type = 'emplacement_champi'");
+                    $test = Table::getUniqueValueFromDB("SELECT `location` FROM `foret` WHERE `location` = '{$coord}' AND `type` = 'emplacement_champi'");
                     if ($test != NULL)
                     {
                         $square[] = $test;
@@ -1265,10 +1291,10 @@ function argPartner($parg1, $parg2)
 
     function Partner($parg1, $parg2, $varg1, $varg2)
     {
-        $phosphore = self::getUniqueValueFromDB("SELECT phosphore FROM player WHERE player_id={$this->player_id}");
-        $azote = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id={$this->player_id}");
-        $potassium= self::getUniqueValueFromDB("SELECT potassium FROM player WHERE player_id={$this->player_id}")-2;
-        $carbone= self::getUniqueValueFromDB("SELECT carbone FROM player WHERE player_id={$this->player_id}") -1;
+        $phosphore = Table::getUniqueValueFromDB("SELECT `phosphore` FROM `player` WHERE `player_id`={$this->player_id}");
+        $azote = Table::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id`={$this->player_id}");
+        $potassium= Table::getUniqueValueFromDB("SELECT `potassium` FROM `player` WHERE `player_id`={$this->player_id}")-2;
+        $carbone= Table::getUniqueValueFromDB("SELECT `carbone` FROM `player` WHERE `player_id`={$this->player_id}") -1;
         if (($phosphore == 0) && ($azote == 0) && ($potassium == 0 ))
         {
         undergrove::$instance->addPending($this->player_id, "PartnerStep1");
@@ -1329,7 +1355,7 @@ function argPartner($parg1, $parg2)
         $ret['title'] = clienttranslate('${actplayer} does the Partner action');
         $ret['titleyou'] = clienttranslate('${you} must select a mushroom');
 
-        $controle = self::getObjectListFromDB( "SELECT card_id id FROM champignon WHERE card_location LIKE CONCAT('hand_', {$this->player_id})", true );
+        $controle = Table::getObjectListFromDB( "SELECT `card_id` `id` FROM `champignon` WHERE `card_location` LIKE CONCAT('hand_', {$this->player_id})", true );
         
         foreach ($controle as $id)
         {
@@ -1366,14 +1392,14 @@ function argPartner($parg1, $parg2)
         $tableau = array();
         $tableau2 = array();
         $square=array();
-        $tableau["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $tableau["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
 
         foreach ($tableau["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $tableau2[]=$racine;
@@ -1385,7 +1411,7 @@ function argPartner($parg1, $parg2)
         {
         
         $semi=array();  
-        $semi = self::getObjectListFromDB( "SELECT location location FROM foret WHERE (type = 'semi' OR type ='arbre') AND player_id = {$this->player_id}" );
+        $semi = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE (`type` = 'semi' OR `type` ='arbre') AND `player_id` = {$this->player_id}" );
         
         foreach ($semi as $emplacement)
         {
@@ -1403,7 +1429,7 @@ function argPartner($parg1, $parg2)
                     $newb = $b + $j;
                     $coord = "square_".$newa."_".$newb;
                     
-                    $test = self::getUniqueValueFromDB("SELECT location FROM foret WHERE location = '{$coord}' AND type = 'emplacement_champi'");
+                    $test = Table::getUniqueValueFromDB("SELECT `location` FROM `foret` WHERE `location` = '{$coord}' AND `type` = 'emplacement_champi'");
                     if ($test != NULL)
                     {
                         $square[] = $test;
@@ -1418,7 +1444,7 @@ function argPartner($parg1, $parg2)
         /// fin test obligation placer champi
         if (($this->player_carbone >= 1) && ($this->player_potassium >= 2) && ($this->player_racine >=1) && ($tableau2 != NULL))
         {
-        $ret["selectable"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_champi'", true );
+        $ret["selectable"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_champi'", true );
         }
 
         if (($this->player_carbone >= 1) && ($this->player_potassium >= 2) && ($this->player_racine >=1) && ($tableau2 == NULL) && ($square != NULL))
@@ -1454,33 +1480,33 @@ function argPartner($parg1, $parg2)
         if ($parg2 == "N")
         {
         
-        self::DbQuery( "UPDATE player set azote = azote -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` -1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($parg2 == "P")
         {
         
-        self::DbQuery( "UPDATE player set phosphore = phosphore -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` -1  WHERE `player_id` = {$this->player_id}" );
         }
 
         if ($parg2 == "K")
         {
         
-        self::DbQuery( "UPDATE player set potassium = potassium -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` -1  WHERE `player_id` = {$this->player_id}" );
         }
 
         /// maj de tous les elements des panneaux joueurs
         undergrove::$instance->MajRessources();
 
         $explode = explode("_", $parg1);
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$explode[1]}");
-        $origine = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$explode[1]}");
-        $position = self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$explode[1]}");
-        $carbone = self::getUniqueValueFromDB("SELECT carbone carbone FROM champignon WHERE card_id={$explode[1]}");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $origine = Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $position = Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $carbone = Table::getUniqueValueFromDB("SELECT `carbone` `carbone` FROM `champignon` WHERE `card_id`={$explode[1]}");
         undergrove::$instance->champignon->moveCard( $explode[1], $varg1);
         undergrove::$instance->champignon->pickCardForLocation( 'deck', $origine, $position );
-        $newid = self::getUniqueValueFromDB("SELECT card_id id FROM champignon WHERE card_location='{$origine}' AND card_location_arg={$position}");
-        self::DbQuery( "UPDATE champignon set card_location = 'hand'  WHERE card_id = {$newid}" );
+        $newid = Table::getUniqueValueFromDB("SELECT `card_id` `id` FROM `champignon` WHERE `card_location`='{$origine}' AND `card_location_arg`={$position}");
+        Table::DbQuery( "UPDATE `champignon` set `card_location` = 'hand'  WHERE `card_id` = {$newid}" );
 
 
         undergrove::$instance->notifyAllPlayers("move",clienttranslate( '${player_name} places a mushroom' ), array(
@@ -1495,7 +1521,7 @@ function argPartner($parg1, $parg2)
         );
         
         //emplacement champi devient champi
-        self::DbQuery( "UPDATE foret set type = 'champi' WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'champi' WHERE `location` = '{$varg1}'" );
 
 
         $this->ChampiSpecial($type, $varg1);
@@ -1514,7 +1540,7 @@ function argPartner($parg1, $parg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2]);
                 $newlocation = 'square_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             
         }
 
@@ -1523,7 +1549,7 @@ function argPartner($parg1, $parg2)
                 $newx = intval($explode2[1]);
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'square_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
 
         //emplacement_semi
@@ -1534,7 +1560,7 @@ function argPartner($parg1, $parg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'circle_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location, carbone) SELECT 'emplacement_semi', '{$newlocation}', 0 WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`, `carbone`) SELECT 'emplacement_semi', '{$newlocation}', 0 WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
         }
 
@@ -1552,7 +1578,7 @@ function argPartner($parg1, $parg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'minisquare_'.$x.'_'.$y.'_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location, sens_racine) SELECT 'emplacement_racine', '{$newlocation}', '{$valeursens}'  WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`, `sens_racine`) SELECT 'emplacement_racine', '{$newlocation}', '{$valeursens}'  WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
          }
          
@@ -1566,9 +1592,9 @@ function argPartner($parg1, $parg2)
             /*undergrove::$instance->notifyAllPlayers("hand",'', array(
             
                 'id' =>  $newid,
-                'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$newid}"),
-                'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$newid}"),
-                'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}"),
+                'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$newid}"),
+                'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$newid}"),
+                'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}"),
                 
             )
             );*/
@@ -1596,7 +1622,7 @@ function argPartner($parg1, $parg2)
         $ret['title'] = clienttranslate('${actplayer} does the Partner action');
         $ret['titleyou'] = clienttranslate('${you} can select and place 2nd mushroom for free thanks to your bonus');
 
-        $controle = self::getObjectListFromDB( "SELECT card_id id FROM champignon WHERE card_location LIKE CONCAT('hand_', {$this->player_id})", true );
+        $controle = Table::getObjectListFromDB( "SELECT `card_id` `id` FROM `champignon` WHERE `card_location` LIKE CONCAT('hand_', {$this->player_id})", true );
         
         foreach ($controle as $id)
         {
@@ -1623,9 +1649,9 @@ function argPartner($parg1, $parg2)
             /*undergrove::$instance->notifyAllPlayers("hand",'', array(
             
                 'id' =>  $parg1,
-                'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$parg1}"),
-                'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$parg1}"),
-                'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$parg1}"),
+                'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$parg1}"),
+                'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$parg1}"),
+                'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$parg1}"),
                 
             )
             ); */
@@ -1651,7 +1677,7 @@ function argPartner($parg1, $parg2)
         $ret['title'] = clienttranslate('${actplayer} does the Partner action');
         $ret['titleyou'] = clienttranslate('${you} must place the mushroom');
 
-        $ret["selectable"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_champi'", true );
+        $ret["selectable"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_champi'", true );
 
         $ret["selected"] = array();
         $ret["selected"][] = $parg1;
@@ -1668,14 +1694,14 @@ function argPartner($parg1, $parg2)
         // varg1 = square destination (ce qui a été cliqué dans ce arg)
 
         $explode = explode("_", $parg1);
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$explode[1]}");
-        $origine = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$explode[1]}");
-        $position = self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$explode[1]}");
-        $carbone = self::getUniqueValueFromDB("SELECT carbone carbone FROM champignon WHERE card_id={$explode[1]}");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $origine = Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $position = Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$explode[1]}");
+        $carbone = Table::getUniqueValueFromDB("SELECT `carbone` `carbone` FROM `champignon` WHERE `card_id`={$explode[1]}");
         undergrove::$instance->champignon->moveCard( $explode[1], $varg1);
         undergrove::$instance->champignon->pickCardForLocation( 'deck', $origine, $position );
-        $newid = self::getUniqueValueFromDB("SELECT card_id id FROM champignon WHERE card_location='{$origine}' AND card_location_arg={$position}");
-        self::DbQuery( "UPDATE champignon set card_location = 'hand'  WHERE card_id = {$newid}" );
+        $newid = Table::getUniqueValueFromDB("SELECT `card_id` `id` FROM `champignon` WHERE `card_location`='{$origine}' AND `card_location_arg`={$position}");
+        Table::DbQuery( "UPDATE `champignon` set `card_location` = 'hand'  WHERE `card_id` = {$newid}" );
 
         undergrove::$instance->notifyAllPlayers("move",clienttranslate( '${player_name} places a mushroom (bonus)' ), array(
             
@@ -1689,7 +1715,7 @@ function argPartner($parg1, $parg2)
         );
         
         //emplacement champi devient champi
-        self::DbQuery( "UPDATE foret set type = 'champi' WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'champi' WHERE `location` = '{$varg1}'" );
 
         $this->ChampiSpecial($type, $varg1);
     
@@ -1706,7 +1732,7 @@ function argPartner($parg1, $parg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2]);
                 $newlocation = 'square_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             
         }
 
@@ -1715,7 +1741,7 @@ function argPartner($parg1, $parg2)
                 $newx = intval($explode2[1]);
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'square_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`) SELECT 'emplacement_champi', '{$newlocation}' WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
 
         //emplacement_semi
@@ -1726,7 +1752,7 @@ function argPartner($parg1, $parg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'circle_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location, carbone) SELECT 'emplacement_semi', '{$newlocation}', 0 WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`, `carbone`) SELECT 'emplacement_semi', '{$newlocation}', 0 WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
         }
 
@@ -1744,7 +1770,7 @@ function argPartner($parg1, $parg2)
                 $newx = intval($explode2[1])+$i;
                 $newy = intval($explode2[2])+$j;
                 $newlocation = 'minisquare_'.$x.'_'.$y.'_'.$newx.'_'.$newy;
-                self::DbQuery( "INSERT INTO foret (type, location, sens_racine) SELECT 'emplacement_racine', '{$newlocation}', '{$valeursens}'  WHERE NOT EXISTS (SELECT 1 FROM foret WHERE location = '{$newlocation}')" );
+                Table::DbQuery( "INSERT INTO `foret` (`type`, `location`, `sens_racine`) SELECT 'emplacement_racine', '{$newlocation}', '{$valeursens}'  WHERE NOT EXISTS (SELECT 1 FROM `foret` WHERE `location` = '{$newlocation}')" );
             }
          }
          
@@ -1752,9 +1778,9 @@ function argPartner($parg1, $parg2)
          /*undergrove::$instance->notifyAllPlayers("hand",'', array(
             
             'id' =>  $parg2,
-            'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$parg2}"),
-            'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$parg2}"),
-            'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$parg2}"),
+            'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$parg2}"),
+            'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$parg2}"),
+            'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$parg2}"),
             
         )
         );  
@@ -1762,9 +1788,9 @@ function argPartner($parg1, $parg2)
         undergrove::$instance->notifyAllPlayers("hand",'', array(
             
             'id' =>  $newid,
-            'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$newid}"),
-            'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$newid}"),
-            'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}"),
+            'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$newid}"),
+            'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$newid}"),
+            'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}"),
             
         )
         );      */
@@ -1790,14 +1816,14 @@ function argPartner($parg1, $parg2)
         $ret['title'] = clienttranslate('${actplayer} does the Partner action');
         $ret['titleyou'] = clienttranslate('${you} must place a root');
 
-        $ret["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $ret["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
 
         foreach ($ret["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $ret["selectable"][]=$racine;
@@ -1821,7 +1847,7 @@ function argPartner($parg1, $parg2)
 
     function PartnerStep1($parg1, $parg2, $varg1, $varg2)
     {
-        $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location='{$varg1}'");
+        $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location`='{$varg1}'");
 
         undergrove::$instance->notifyAllPlayers("placeracine",clienttranslate( '${player_name} places a root' ), array(
             
@@ -1836,25 +1862,25 @@ function argPartner($parg1, $parg2)
         $this->TestBonusPermanent($varg1);
         $this->ScoreRacine ($varg1);
 
-        self::DbQuery( "UPDATE player set racine = racine -1  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE foret set type = 'racine' WHERE location = '{$varg1}'" );
-        self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `player` set `racine` = `racine` -1  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'racine' WHERE `location` = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
         $exploderacine = explode("_", $varg1);
         $square = "square_".$exploderacine[1]."_".$exploderacine[2];
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_location = '{$square}'");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_location` = '{$square}'");
         undergrove::$instance->setGameStateValue('goalracine1', $type);
 
-        $nbracine = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id={$this->player_id}");
+        $nbracine = Table::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id`={$this->player_id}");
 
-        $tableau["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $tableau["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
         $emplacement = array();
         foreach ($tableau["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $emplacement[]=$racine;
@@ -1865,8 +1891,8 @@ function argPartner($parg1, $parg2)
         $emplacementracine = count ($emplacement); 
         
         
-        self::DbQuery( "UPDATE player set potassium = potassium -2  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set carbone = carbone -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` -2  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone` -1  WHERE `player_id` = {$this->player_id}" );
 
         /// maj de tous les elements des panneaux joueurs
         undergrove::$instance->MajRessources();
@@ -1904,14 +1930,14 @@ function argPartner($parg1, $parg2)
         $ret['title'] = clienttranslate('${actplayer} does the Partner action');
         $ret['titleyou'] = clienttranslate('${you} can place a 2nd root');
 
-        $ret["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $ret["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
 
         foreach ($ret["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $ret["selectable"][]=$racine;
@@ -1948,7 +1974,7 @@ function argPartner($parg1, $parg2)
         else{
         
         
-        $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location='{$varg1}'");
+        $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location`='{$varg1}'");
 
         undergrove::$instance->notifyAllPlayers("placeracine",clienttranslate( '${player_name} places a root' ), array(
             
@@ -1962,25 +1988,25 @@ function argPartner($parg1, $parg2)
         $this->TestBonusPermanent($varg1);
         $this->ScoreRacine ($varg1);
 
-        self::DbQuery( "UPDATE player set racine = racine -1  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE foret set type = 'racine' WHERE location = '{$varg1}'" );
-        self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `player` set `racine` = `racine` -1  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'racine' WHERE `location` = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
         $exploderacine = explode("_", $varg1);
         $square = "square_".$exploderacine[1]."_".$exploderacine[2];
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_location = '{$square}'");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_location` = '{$square}'");
         undergrove::$instance->setGameStateValue('goalracine2', $type);
 
-        $nbracine = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id={$this->player_id}");
+        $nbracine = Table::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id`={$this->player_id}");
 
-        $tableau["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $tableau["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
         $emplacement = array();
         foreach ($tableau["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $emplacement[]=$racine;
@@ -2030,14 +2056,14 @@ function argPartner($parg1, $parg2)
         $ret['title'] = clienttranslate('${actplayer} does the Partner action');
         $ret['titleyou'] = clienttranslate('${you} can place a 3rd root thanks to your bonus');
 
-        $ret["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $ret["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
 
         foreach ($ret["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $ret["selectable"][]=$racine;
@@ -2066,7 +2092,7 @@ function argPartner($parg1, $parg2)
         else
         {
         
-        $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location='{$varg1}'");
+        $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location`='{$varg1}'");
 
         undergrove::$instance->notifyAllPlayers("placeracine",clienttranslate( '${player_name} places a root (bonus)' ), array(
             
@@ -2081,15 +2107,15 @@ function argPartner($parg1, $parg2)
         $this->TestBonusPermanent($varg1);
         $this->ScoreRacine ($varg1);
 
-        self::DbQuery( "UPDATE player set racine = racine -1  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE foret set type = 'racine' WHERE location = '{$varg1}'" );
-        self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `player` set `racine` = `racine` -1  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `foret` set `type` = 'racine' WHERE `location` = '{$varg1}'" );
+        Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
 
 
         $exploderacine = explode("_", $varg1);
         $square = "square_".$exploderacine[1]."_".$exploderacine[2];
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_location = '{$square}'");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_location` = '{$square}'");
         undergrove::$instance->setGameStateValue('goalracine3', $type);
 
         
@@ -2150,8 +2176,8 @@ function Photo($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "Yesphotoechange")
     {
-        self::DbQuery( "UPDATE player set azote = azote -1  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set carbone = carbone+1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` -1  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone`+1  WHERE `player_id` = {$this->player_id}" );
 
         undergrove::$instance->notifyAllPlayers("message",clienttranslate( '${player_name} exchanges ${n} for ${c}' ), array(
             'player_name' => $this->player_name,
@@ -2165,13 +2191,13 @@ function Photo($parg1, $parg2, $varg1, $varg2)
         undergrove::$instance->setGameStateValue('compteurcarbone', $compteurcarbone);
 
         $numero = "p".$this->player_no;
-        self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1  WHERE card_type = 2" );  
+        Table::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1  WHERE `card_type` = 2" );  
         
 
 
         /// maj de tous les elements des panneaux joueurs
         undergrove::$instance->MajRessources();
-        $azote = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id={$this->player_id}");
+        $azote = Table::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id`={$this->player_id}");
         if ($azote >= 1)
         {
         undergrove::$instance->addPending($this->player_id, "PhotoEchangeSupp");
@@ -2217,8 +2243,8 @@ function argPhotoEchangeSupp($parg1, $parg2)
 function PhotoEchangeSupp($parg1, $parg2, $varg1, $varg2)
 {
     
-    self::DbQuery( "UPDATE player set azote = azote -1  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set carbone = carbone+1  WHERE player_id = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `player` set `azote` = `azote` -1  WHERE `player_id` = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone`+1  WHERE `player_id` = {$this->player_id}" );
 
         undergrove::$instance->notifyAllPlayers("message",clienttranslate( '${player_name} exchanges ${n} for ${c}' ), array(
             'player_name' => $this->player_name,
@@ -2231,13 +2257,13 @@ function PhotoEchangeSupp($parg1, $parg2, $varg1, $varg2)
         $compteurcarbone = undergrove::$instance->getGameStateValue('compteurcarbone') + 1;
         undergrove::$instance->setGameStateValue('compteurcarbone', $compteurcarbone);
         $numero = "p".$this->player_no;
-        self::DbQuery( "UPDATE goal set {$numero} = {$numero} +1  WHERE card_type = 2" ); 
+        Table::DbQuery( "UPDATE `goal` set {$numero} = {$numero} +1  WHERE `card_type` = 2" ); 
         
 
 
         /// maj de tous les elements des panneaux joueurs
         undergrove::$instance->MajRessources();
-        $azote = self::getUniqueValueFromDB("SELECT azote FROM player WHERE player_id={$this->player_id}");
+        $azote = Table::getUniqueValueFromDB("SELECT `azote` FROM `player` WHERE `player_id`={$this->player_id}");
         if ($azote >= 1)
         {
         undergrove::$instance->addPending($this->player_id, "PhotoEchangeSupp");
@@ -2262,7 +2288,7 @@ function argPhotoDiscard($parg1, $parg2)
     $ret['titleyou'] = clienttranslate('${you} can select the mushrooms to discard');
 
     $ret["selectable2"] = array();
-    $controle = self::getObjectListFromDB( "SELECT card_id id FROM champignon WHERE card_location LIKE CONCAT('hand_', {$this->player_id})", true );
+    $controle = Table::getObjectListFromDB( "SELECT `card_id` `id` FROM `champignon` WHERE `card_location` LIKE CONCAT('hand_', {$this->player_id})", true );
         
         foreach ($controle as $id)
         {
@@ -2291,7 +2317,7 @@ function PhotoDiscard($parg1, $parg2, $varg1, $varg2)
 {
     if ($this->player_bonus_carbone == 0)
     {
-        self::DbQuery( "UPDATE player set carbone = carbone+2  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone`+2  WHERE `player_id` = {$this->player_id}" );
         $compteurcarbone = undergrove::$instance->getGameStateValue('compteurcarbone') + 2;
         undergrove::$instance->setGameStateValue('compteurcarbone', $compteurcarbone);
         undergrove::$instance->notifyAllPlayers("message",clienttranslate( '${player_name} gains ${c} ${c} thanks to the Photosynthesize action' ), array(
@@ -2304,7 +2330,7 @@ function PhotoDiscard($parg1, $parg2, $varg1, $varg2)
 
     if ($this->player_bonus_carbone == 1)
     {
-        self::DbQuery( "UPDATE player set carbone = carbone+3  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone`+3  WHERE `player_id` = {$this->player_id}" );
         $compteurcarbone = undergrove::$instance->getGameStateValue('compteurcarbone') + 3;
         undergrove::$instance->setGameStateValue('compteurcarbone', $compteurcarbone);
         undergrove::$instance->notifyAllPlayers("message",clienttranslate( '${player_name} gains ${c} ${c} ${c} thanks to the Photosynthesize action' ), array(
@@ -2315,10 +2341,10 @@ function PhotoDiscard($parg1, $parg2, $varg1, $varg2)
         );
     }
     
-    self::DbQuery( "UPDATE player set activation_b = 1  WHERE player_id = {$this->player_id}" );
-    self::DbQuery( "UPDATE player set activation_p = 1  WHERE player_id = {$this->player_id}" );
-    self::DbQuery( "UPDATE player set activation_g = 1  WHERE player_id = {$this->player_id}" );
-    self::DbQuery( "UPDATE player set activation_y = 1  WHERE player_id = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `player` set `activation_b` = 1  WHERE `player_id` = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `player` set `activation_p` = 1  WHERE `player_id` = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `player` set `activation_g` = 1  WHERE `player_id` = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `player` set `activation_y` = 1  WHERE `player_id` = {$this->player_id}" );
 
     undergrove::$instance->MajRessources();
 
@@ -2349,7 +2375,7 @@ function argActivate($parg1, $parg2)
 
     $listechampi = undergrove::$instance->listechampi;
     
-    $racines =  self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'racine' AND player_id = {$this->player_id}", true );
+    $racines =  Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'racine' AND `player_id` = {$this->player_id}", true );
 
     foreach ($racines as $racine)
 
@@ -2357,8 +2383,8 @@ function argActivate($parg1, $parg2)
         $exploderacine = explode("_", $racine);
         $square = "square_".$exploderacine[1]."_".$exploderacine[2];
 
-        $id = self::getUniqueValueFromDB("SELECT card_id id FROM champignon WHERE card_location = '{$square}'");
-        $type = intval(self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id = {$id}"));
+        $id = Table::getUniqueValueFromDB("SELECT `card_id` `id` FROM `champignon` WHERE `card_location` = '{$square}'");
+        $type = intval(Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id` = {$id}"));
 
            
          
@@ -2380,7 +2406,7 @@ function Activate($parg1, $parg2, $varg1, $varg2)
 
     $champi = explode("_",$varg1);
     $champiid = $champi[1];
-    $champitype = self::getUniqueValueFromDB("SELECT card_type FROM champignon WHERE card_id={$champiid}");
+    $champitype = Table::getUniqueValueFromDB("SELECT `card_type` FROM `champignon` WHERE `card_id`={$champiid}");
     
     undergrove::$instance->addPendingTarget($this->player_id, "Champi".$champitype, "init");
 
@@ -2442,22 +2468,22 @@ function Absorb($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "Activationb")
     {
-        self::DbQuery( "UPDATE player set activation_b = 0  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_b` = 0  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "Activationp")
     {
-        self::DbQuery( "UPDATE player set activation_p = 0  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_p` = 0  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "Activationg")
     {
-        self::DbQuery( "UPDATE player set activation_g = 0  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_g` = 0  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "Activationy")
     {
-        self::DbQuery( "UPDATE player set activation_y = 0  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_y` = 0  WHERE `player_id` = {$this->player_id}" );
     }
 
     undergrove::$instance->MajRessources();
@@ -2506,17 +2532,17 @@ function AbsorbStep2($parg1, $parg2, $varg1, $varg2)
 {
     if ($varg1 == "N")
     {
-        self::DbQuery( "UPDATE player set azote = azote - 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` - 1  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "P")
     {
-        self::DbQuery( "UPDATE player set phosphore = phosphore -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` -1  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "K")
     {
-        self::DbQuery( "UPDATE player set potassium = potassium -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` -1  WHERE `player_id` = {$this->player_id}" );
     }
 
     
@@ -2535,7 +2561,7 @@ function argAbsorbStep3($parg1, $parg2)
     $ret['title'] = clienttranslate('${actplayer} does the Absorb action');
     $ret['titleyou'] = clienttranslate('${you} must choose the seedling that will absorb the carbon');
 
-    $controle = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'semi' AND player_id = {$this->player_id} AND carbone < 4", true );
+    $controle = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'semi' AND `player_id` = {$this->player_id} AND `carbone` < 4", true );
     
         
     foreach ($controle as $id)
@@ -2572,7 +2598,7 @@ function argAbsorbStep4($parg1, $parg2)
     $ret['titleyou'] = clienttranslate('${you} must choose the mushroom to absorb');
 
         
-    $controle = self::getObjectListFromDB( "SELECT card_id id FROM champignon WHERE card_location LIKE 'square%' AND carbone >= 1", true );    
+    $controle = Table::getObjectListFromDB( "SELECT `card_id` `id` FROM `champignon` WHERE `card_location` LIKE 'square%' AND `carbone` >= 1", true );    
     foreach ($controle as $id)
     {
         
@@ -2597,9 +2623,9 @@ function AbsorbStep4($parg1, $parg2, $varg1, $varg2)
 
     $explodesemi = explode("_", $parg1);
     $test = "\_".$explodesemi[1]."\_".$explodesemi[2];  // echapement des "_" pour qu'il ne les prennent pas pour des jokers
-    $recupminisquare = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'racine' AND player_id = {$this->player_id} AND location LIKE '%$test'", true );
+    $recupminisquare = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'racine' AND `player_id` = {$this->player_id} AND `location` LIKE '%$test'", true );
     $explodechampi = explode("_", $varg1);
-    $recupsquare = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id = {$explodechampi[1]}");
+    $recupsquare = Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id` = {$explodechampi[1]}");
     $explodesquare = explode("_", $recupsquare);
 
 
@@ -2610,12 +2636,12 @@ function AbsorbStep4($parg1, $parg2, $varg1, $varg2)
         if (($explodeminisquare[1]==$explodesquare[1]) && ($explodeminisquare[2]==$explodesquare[2]) && ($explodeminisquare[3]==$explodesemi[1]) && ($explodeminisquare[4]==$explodesemi[2]))
         {
             $circle = "circle_".$explodesemi[1]."_".$explodesemi[2];
-            self::DbQuery( "UPDATE foret set carbone = carbone +1  WHERE location = '{$circle}'" );
-            self::DbQuery( "UPDATE champignon set carbone = carbone -1  WHERE card_id = {$explodechampi[1]}" );
+            Table::DbQuery( "UPDATE `foret` set `carbone` = `carbone` +1  WHERE `location` = '{$circle}'" );
+            Table::DbQuery( "UPDATE `champignon` set `carbone` = `carbone` -1  WHERE `card_id` = {$explodechampi[1]}" );
 
              /////movecarbone
 
-            //$recupsquare = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id = {$explodechampi[1]}");
+            //$recupsquare = Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id` = {$explodechampi[1]}");
 
             undergrove::$instance->notifyAllPlayers("movecarbone",clienttranslate( '${player_name} absorbs ${c}' ), array(
             
@@ -2634,11 +2660,11 @@ function AbsorbStep4($parg1, $parg2, $varg1, $varg2)
 
             $absorb = 1;
             //test transform arbre
-            $testarbre = self::getUniqueValueFromDB("SELECT carbone carbone FROM foret WHERE location = '{$circle}'");
+            $testarbre = Table::getUniqueValueFromDB("SELECT `carbone` `carbone` FROM `foret` WHERE `location` = '{$circle}'");
             if (($this->player_arbre >=1) && ($testarbre == 3))
             {
-                self::DbQuery( "UPDATE player set arbre = arbre -1  WHERE player_id = {$this->player_id}" );
-                self::DbQuery( "UPDATE foret set type = 'arbre' WHERE location = '{$circle}'" );
+                Table::DbQuery( "UPDATE `player` set `arbre` = `arbre` -1  WHERE `player_id` = {$this->player_id}" );
+                Table::DbQuery( "UPDATE `foret` set `type` = 'arbre' WHERE `location` = '{$circle}'" );
                 
                 undergrove::$instance->notifyAllPlayers("placearbre",clienttranslate( '${player_name} places a tree' ), array(
         
@@ -2763,37 +2789,37 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
     
     if ($varg1 == "Activationb")
     {
-        self::DbQuery( "UPDATE player set activation_b = 0  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_b` = 0  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "Activationp")
     {
-        self::DbQuery( "UPDATE player set activation_p = 0  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_p` = 0  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "Activationg")
     {
-        self::DbQuery( "UPDATE player set activation_g = 0  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_g` = 0  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "Activationy")
     {
-        self::DbQuery( "UPDATE player set activation_y = 0  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_y` = 0  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "N")
     {
-        self::DbQuery( "UPDATE player set azote = azote - 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` - 1  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "P")
     {
-        self::DbQuery( "UPDATE player set phosphore = phosphore -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` -1  WHERE `player_id` = {$this->player_id}" );
     }
 
     if ($varg1 == "K")
     {
-        self::DbQuery( "UPDATE player set potassium = potassium -1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` -1  WHERE `player_id` = {$this->player_id}" );
     }
     
     undergrove::$instance->MajRessources();
@@ -2804,12 +2830,12 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
         $explodechampi = explode("_", $parg2);
         $explodesemi = explode("_", $parg1);
         $circle = "circle_".$explodesemi[1]."_".$explodesemi[2];
-        self::DbQuery( "UPDATE foret set carbone = carbone +1  WHERE location = '{$circle}'" );
-        self::DbQuery( "UPDATE champignon set carbone = carbone -1  WHERE card_id = {$explodechampi[1]}" );
+        Table::DbQuery( "UPDATE `foret` set `carbone` = `carbone` +1  WHERE `location` = '{$circle}'" );
+        Table::DbQuery( "UPDATE `champignon` set `carbone` = `carbone` -1  WHERE `card_id` = {$explodechampi[1]}" );
 
         /////movecarbone
 
-        $recupsquare = self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id = {$explodechampi[1]}");
+        $recupsquare = Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id` = {$explodechampi[1]}");
 
         undergrove::$instance->notifyAllPlayers("movecarbone",clienttranslate( '${player_name} absorbs ${c}' ), array(
         
@@ -2826,11 +2852,11 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
 
 
         //test transform arbre
-        $testarbre = self::getUniqueValueFromDB("SELECT carbone carbone FROM foret WHERE location = '{$circle}'");
+        $testarbre = Table::getUniqueValueFromDB("SELECT `carbone` `carbone` FROM `foret` WHERE `location` = '{$circle}'");
         if (($this->player_arbre >=1) && ($testarbre == 3))
         {
-            self::DbQuery( "UPDATE player set arbre = arbre -1  WHERE player_id = {$this->player_id}" );
-            self::DbQuery( "UPDATE foret set type = 'arbre' WHERE location = '{$circle}'" );
+            Table::DbQuery( "UPDATE `player` set `arbre` = `arbre` -1  WHERE `player_id` = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `foret` set `type` = 'arbre' WHERE `location` = '{$circle}'" );
             
             undergrove::$instance->notifyAllPlayers("placearbre",clienttranslate( '${player_name} places a tree' ), array(
         
@@ -2872,15 +2898,15 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
     function earthlover()   //après chaque absorb et juste avant le addpending NormalTurl peut etre a mettre plutot dans le carbontrack
 
     {
-        $testchampicentral = count(self::getObjectListFromDB( "SELECT card_id id FROM champignon WHERE carbone != 0",true));
+        $testchampicentral = count(Table::getObjectListFromDB( "SELECT `card_id` `id` FROM `champignon` WHERE `carbone` != 0",true));
         
         if ($testchampicentral == 0)
         {
             
-            self::DbQuery( "UPDATE champignon set carbone = carbone +1  WHERE card_location = 'square_1_0'" );
-            self::DbQuery( "UPDATE champignon set carbone = carbone +1  WHERE card_location = 'square_-1_0'" );
-            self::DbQuery( "UPDATE champignon set carbone = carbone +1  WHERE card_location = 'square_0_1'" );
-            self::DbQuery( "UPDATE champignon set carbone = carbone +1  WHERE card_location = 'square_0_-1'" );
+            Table::DbQuery( "UPDATE `champignon` set `carbone` = `carbone` +1  WHERE `card_location` = 'square_1_0'" );
+            Table::DbQuery( "UPDATE `champignon` set `carbone` = `carbone` +1  WHERE `card_location` = 'square_-1_0'" );
+            Table::DbQuery( "UPDATE `champignon` set `carbone` = `carbone` +1  WHERE `card_location` = 'square_0_1'" );
+            Table::DbQuery( "UPDATE `champignon` set `carbone` = `carbone` +1  WHERE `card_location` = 'square_0_-1'" );
             undergrove::$instance->notifyAllPlayers('powerearthlover',clienttranslate( 'there are no more ${c} to absorb in the forest, Earthlover generates 4 ${c} around him' ), array(
                 'c' => undergrove::$instance->getLogsRessource(4),
             )
@@ -2897,10 +2923,10 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
         $locationchampi = "square_".$exploderacine[1]."_".$exploderacine[2];
         $locationsemi = "circle_".$exploderacine[3]."_".$exploderacine[4];
 
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_location = '{$locationchampi}'");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_location` = '{$locationchampi}'");
         if (($type >= 41) && ($type <=48))
         {
-            $vp = self::getUniqueValueFromDB("SELECT score score FROM champispecial WHERE type = {$type}");
+            $vp = Table::getUniqueValueFromDB("SELECT `score` `score` FROM `champispecial` WHERE `type` = {$type}");
         }
         else
         {
@@ -2910,13 +2936,13 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
 
         
             
-        $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location = '{$locationracine}'");
+        $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location` = '{$locationracine}'");
         
         $colonne = "vp_racine".$sens;
 
         
 
-        self::DbQuery( "UPDATE foret set {$colonne} = {$vp}  WHERE location = '{$locationsemi}'" );
+        Table::DbQuery( "UPDATE `foret` set {$colonne} = {$vp}  WHERE `location` = '{$locationsemi}'" );
         
 
     }
@@ -2928,11 +2954,11 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
     function CarbonTrack()   //après chaque absorb 
 
     {
-        $trackbefore = self::getUniqueValueFromDB("SELECT track track FROM player WHERE player_id = {$this->player_id}");
+        $trackbefore = Table::getUniqueValueFromDB("SELECT `track` `track` FROM `player` WHERE `player_id` = {$this->player_id}");
         if ($trackbefore < 8)
             {
-                self::DbQuery( "UPDATE player set track = track +1  WHERE player_id = {$this->player_id}" );
-                $trackafter = self::getUniqueValueFromDB("SELECT track track FROM player WHERE player_id = {$this->player_id}");
+                Table::DbQuery( "UPDATE `player` set `track` = `track` +1  WHERE `player_id` = {$this->player_id}" );
+                $trackafter = Table::getUniqueValueFromDB("SELECT `track` `track` FROM `player` WHERE `player_id` = {$this->player_id}");
                 undergrove::$instance->notifyAllPlayers('carbontrack','', array(
                     'track' =>  $trackafter,
                     )
@@ -2941,7 +2967,7 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
 
                     if ($trackafter == 1)
                     {
-                        self::DbQuery( "UPDATE player set azote = azote +1  WHERE player_id = {$this->player_id}" );
+                        Table::DbQuery( "UPDATE `player` set `azote` = `azote` +1  WHERE `player_id` = {$this->player_id}" );
                         undergrove::$instance->MajRessources();
                         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${n} (bonus carbon track)' ), array(
                             'player_name' => $this->player_name,
@@ -2959,7 +2985,7 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
 
                     if ($trackafter == 8)
                     {
-                        self::DbQuery( "UPDATE player set carbone = carbone +1  WHERE player_id = {$this->player_id}" );
+                        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone` +1  WHERE `player_id` = {$this->player_id}" );
                         $compteurcarbone = undergrove::$instance->getGameStateValue('compteurcarbone') + 1;
                         undergrove::$instance->setGameStateValue('compteurcarbone', $compteurcarbone);
                         undergrove::$instance->MajRessources();
@@ -2990,16 +3016,16 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
                     if (($trackafter == 3)||($trackafter == 7))
                     {
 
-                        $nbracine = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id={$this->player_id}");
+                        $nbracine = Table::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id`={$this->player_id}");
 
-                        $tableau["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+                        $tableau["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
                         $emplacement = array();
                         foreach ($tableau["racinelibre"] as $racine)
                         {
                             
                             $explode = explode("_", $racine);
                             $controle = "circle_".$explode[3]."_".$explode[4];
-                            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+                            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
                             if ($test == $this->player_id)
                             {
                                 $emplacement[]=$racine;
@@ -3068,15 +3094,15 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
     {
         $exploderacine = explode("_", $racine);
         $square = "square_".$exploderacine[1]."_".$exploderacine[2];
-        $type = self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_location = '{$square}'");
+        $type = Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_location` = '{$square}'");
 
         if ($type == 28)
         {
             undergrove::$instance->setGameStateValue('idcopieur', 0);     //pour que le bonus soit pris dans le meme tour ou pas
-            $test = self::getUniqueValueFromDB("SELECT bonus_racine_reproduce FROM player WHERE player_id = {$this->player_id}");
+            $test = Table::getUniqueValueFromDB("SELECT `bonus_racine_reproduce` FROM `player` WHERE `player_id` = {$this->player_id}");
             if ($test != 1)
             {
-            self::DbQuery( "UPDATE player set bonus_racine_reproduce = 1 WHERE player_id = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `bonus_racine_reproduce` = 1 WHERE `player_id` = {$this->player_id}" );
             undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains the root bonus for the Reproduce action' ), array(
                 'player_name' => $this->player_name,
                 )
@@ -3090,10 +3116,10 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
         if ($type == 29)
         {
             undergrove::$instance->setGameStateValue('idcopieur', 0);     //pour que le bonus soit pris dans le meme tour ou pas
-            $test = self::getUniqueValueFromDB("SELECT bonus_racine_partner FROM player WHERE player_id = {$this->player_id}");
+            $test = Table::getUniqueValueFromDB("SELECT `bonus_racine_partner` FROM `player` WHERE `player_id` = {$this->player_id}");
             if ($test != 1)
             {
-            self::DbQuery( "UPDATE player set bonus_racine_partner = 1 WHERE player_id = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `bonus_racine_partner` = 1 WHERE `player_id` = {$this->player_id}" );
             undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains the root bonus for the Partner action' ), array(
                 'player_name' => $this->player_name,
                 )
@@ -3106,10 +3132,10 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
 
         if ($type == 30)
         {
-            $test = self::getUniqueValueFromDB("SELECT bonus_champi_reproduce FROM player WHERE player_id = {$this->player_id}");
+            $test = Table::getUniqueValueFromDB("SELECT `bonus_champi_reproduce` FROM `player` WHERE `player_id` = {$this->player_id}");
             if ($test != 1)
             {
-            self::DbQuery( "UPDATE player set bonus_champi_reproduce = 1 WHERE player_id = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `bonus_champi_reproduce` = 1 WHERE `player_id` = {$this->player_id}" );
             undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains the mushroom bonus for the Reproduce action' ), array(
                 'player_name' => $this->player_name,
                 )
@@ -3120,10 +3146,10 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
 
         if ($type == 31)
         {
-            $test = self::getUniqueValueFromDB("SELECT bonus_champi_partner FROM player WHERE player_id = {$this->player_id}");
+            $test = Table::getUniqueValueFromDB("SELECT `bonus_champi_partner` FROM `player` WHERE `player_id` = {$this->player_id}");
             if ($test != 1)
             {
-            self::DbQuery( "UPDATE player set bonus_champi_partner = 1 WHERE player_id = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `bonus_champi_partner` = 1 WHERE `player_id` = {$this->player_id}" );
             undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains the mushroom bonus for the Partner action' ), array(
                 'player_name' => $this->player_name,
                 )
@@ -3134,10 +3160,10 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
 
         if ($type == 32)
         {
-            $test = self::getUniqueValueFromDB("SELECT bonus_carbone FROM player WHERE player_id = {$this->player_id}");
+            $test = Table::getUniqueValueFromDB("SELECT `bonus_carbone` FROM `player` WHERE `player_id` = {$this->player_id}");
             if ($test != 1)
             {
-            self::DbQuery( "UPDATE player set bonus_carbone = 1 WHERE player_id = {$this->player_id}" );
+            Table::DbQuery( "UPDATE `player` set `bonus_carbone` = 1 WHERE `player_id` = {$this->player_id}" );
             undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains the carbon bonus for the Photosynthesize action' ), array(
                 'player_name' => $this->player_name,
                 )
@@ -3162,94 +3188,94 @@ function AbsorbStep5($parg1, $parg2, $varg1, $varg2)
         $square3 = "square_".($a-1)."_".($b);
         $square4 = "square_".($a+1)."_".($b);
 
-        $typechampiadjacent = self::getObjectListFromDB( "SELECT card_type type FROM champignon WHERE card_location = '{$square1}' OR card_location = '{$square2}' OR card_location = '{$square3}' OR card_location = '{$square4}'", true );
+        $typechampiadjacent = Table::getObjectListFromDB( "SELECT `card_type` `type` FROM `champignon` WHERE `card_location` = '{$square1}' OR `card_location` = '{$square2}' OR `card_location` = '{$square3}' OR `card_location` = '{$square4}'", true );
 
         foreach ($typechampiadjacent as $test)
         {
             if ((($type == 45) && ($listechampi[$test]["coutap"] == 1)) || (($test == 45) && ($listechampi[$type]["coutap"] == 1)))
             {
-                self::DbQuery( "UPDATE champispecial set score = score + 1  WHERE type = 45" );
+                Table::DbQuery( "UPDATE `champispecial` set `score` = `score` + 1  WHERE `type` = 45" );
 
-                $square = self::getUniqueValueFromDB("SELECT card_location FROM champignon WHERE card_type = 45");
+                $square = Table::getUniqueValueFromDB("SELECT `card_location` FROM `champignon` WHERE `card_type` = 45");
                 $explode = explode("_", $square);
                 $test = "minisquare_".$explode[1]."_".$explode[2];  
 
-                $racine = self::getObjectListFromDB( "SELECT location location, sens_racine sens FROM foret WHERE location LIKE '$test%' AND type ='racine'" );
+                $racine = Table::getObjectListFromDB( "SELECT `location` `location`, `sens_racine` sens FROM `foret` WHERE `location` LIKE '$test%' AND `type` ='racine'" );
                 
                 foreach ($racine as $controle)
                 {
                     $exploderacine = explode("_", $controle['location']);
                     $semi = "circle_".$exploderacine[3]."_".$exploderacine[4];
                     $colonne = "vp_racine".$controle['sens'];
-                    $newscore = self::getUniqueValueFromDB("SELECT score FROM champispecial WHERE type = 45");
+                    $newscore = Table::getUniqueValueFromDB("SELECT `score` FROM `champispecial` WHERE `type` = 45");
 
-                    self::DbQuery( "UPDATE foret set {$colonne} = {$newscore} WHERE location = '{$semi}'" );
+                    Table::DbQuery( "UPDATE `foret` set {$colonne} = {$newscore} WHERE `location` = '{$semi}'" );
                 }
 
             }
 
             if ((($type == 46) && ($listechampi[$test]["coutay"] == 1)) || (($test == 46) && ($listechampi[$type]["coutay"] == 1)))
             {
-                self::DbQuery( "UPDATE champispecial set score = score + 1  WHERE type = 46" );
+                Table::DbQuery( "UPDATE `champispecial` set `score` = `score` + 1  WHERE `type` = 46" );
 
-                $square = self::getUniqueValueFromDB("SELECT card_location FROM champignon WHERE card_type = 46");
+                $square = Table::getUniqueValueFromDB("SELECT `card_location` FROM `champignon` WHERE `card_type` = 46");
                 $explode = explode("_", $square);
                 $test = "minisquare_".$explode[1]."_".$explode[2];  
 
-                $racine = self::getObjectListFromDB( "SELECT location location, sens_racine sens FROM foret WHERE location LIKE '$test%' AND type ='racine'" );
+                $racine = Table::getObjectListFromDB( "SELECT `location` `location`, `sens_racine` sens FROM `foret` WHERE `location` LIKE '$test%' AND `type` ='racine'" );
                 
                 foreach ($racine as $controle)
                 {
                     $exploderacine = explode("_", $controle['location']);
                     $semi = "circle_".$exploderacine[3]."_".$exploderacine[4];
                     $colonne = "vp_racine".$controle['sens'];
-                    $newscore = self::getUniqueValueFromDB("SELECT score FROM champispecial WHERE type = 46");
+                    $newscore = Table::getUniqueValueFromDB("SELECT `score` FROM `champispecial` WHERE `type` = 46");
 
-                    self::DbQuery( "UPDATE foret set {$colonne} = {$newscore} WHERE location = '{$semi}'" );
+                    Table::DbQuery( "UPDATE `foret` set {$colonne} = {$newscore} WHERE `location` = '{$semi}'" );
                 }
 
             }
 
             if ((($type == 47) && ($listechampi[$test]["coutab"] == 1)) || (($test == 47) && ($listechampi[$type]["coutab"] == 1)))
             {
-                self::DbQuery( "UPDATE champispecial set score = score + 1  WHERE type = 47" );
+                Table::DbQuery( "UPDATE `champispecial` set `score` = `score` + 1  WHERE `type` = 47" );
 
-                $square = self::getUniqueValueFromDB("SELECT card_location FROM champignon WHERE card_type = 47");
+                $square = Table::getUniqueValueFromDB("SELECT `card_location` FROM `champignon` WHERE `card_type` = 47");
                 $explode = explode("_", $square);
                 $test = "minisquare_".$explode[1]."_".$explode[2];  
 
-                $racine = self::getObjectListFromDB( "SELECT location location, sens_racine sens FROM foret WHERE location LIKE '$test%' AND type ='racine'" );
+                $racine = Table::getObjectListFromDB( "SELECT `location` `location`, `sens_racine` sens FROM `foret` WHERE `location` LIKE '$test%' AND `type` ='racine'" );
                 
                 foreach ($racine as $controle)
                 {
                     $exploderacine = explode("_", $controle['location']);
                     $semi = "circle_".$exploderacine[3]."_".$exploderacine[4];
                     $colonne = "vp_racine".$controle['sens'];
-                    $newscore = self::getUniqueValueFromDB("SELECT score FROM champispecial WHERE type = 47");
+                    $newscore = Table::getUniqueValueFromDB("SELECT `score` FROM `champispecial` WHERE `type` = 47");
 
-                    self::DbQuery( "UPDATE foret set {$colonne} = {$newscore} WHERE location = '{$semi}'" );
+                    Table::DbQuery( "UPDATE `foret` set {$colonne} = {$newscore} WHERE `location` = '{$semi}'" );
                 }
 
             }
 
             if ((($type == 48) && ($listechampi[$test]["coutag"] == 1)) || (($test == 48) && ($listechampi[$type]["coutag"] == 1)))
             {
-                self::DbQuery( "UPDATE champispecial set score = score + 1  WHERE type = 48" );
+                Table::DbQuery( "UPDATE `champispecial` set `score` = `score` + 1  WHERE `type` = 48" );
 
-                $square = self::getUniqueValueFromDB("SELECT card_location FROM champignon WHERE card_type = 48");
+                $square = Table::getUniqueValueFromDB("SELECT `card_location` FROM `champignon` WHERE `card_type` = 48");
                 $explode = explode("_", $square);
                 $test = "minisquare_".$explode[1]."_".$explode[2];  
 
-                $racine = self::getObjectListFromDB( "SELECT location location, sens_racine sens FROM foret WHERE location LIKE '$test%' AND type ='racine'" );
+                $racine = Table::getObjectListFromDB( "SELECT `location` `location`, `sens_racine` sens FROM `foret` WHERE `location` LIKE '$test%' AND `type` ='racine'" );
                 
                 foreach ($racine as $controle)
                 {
                     $exploderacine = explode("_", $controle['location']);
                     $semi = "circle_".$exploderacine[3]."_".$exploderacine[4];
                     $colonne = "vp_racine".$controle['sens'];
-                    $newscore = self::getUniqueValueFromDB("SELECT score FROM champispecial WHERE type = 48");
+                    $newscore = Table::getUniqueValueFromDB("SELECT `score` FROM `champispecial` WHERE `type` = 48");
 
-                    self::DbQuery( "UPDATE foret set {$colonne} = {$newscore} WHERE location = '{$semi}'" );
+                    Table::DbQuery( "UPDATE `foret` set {$colonne} = {$newscore} WHERE `location` = '{$semi}'" );
                 }
 
             }
@@ -3294,7 +3320,7 @@ function BonusCarbonTrackRessource($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "N")
     {
-        self::DbQuery( "UPDATE player set azote = azote + 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` + 1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${n} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'n' => undergrove::$instance->getLogsRessource(1),
@@ -3304,7 +3330,7 @@ function BonusCarbonTrackRessource($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "P")
     {
-        self::DbQuery( "UPDATE player set phosphore = phosphore +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` +1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${p} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'p' => undergrove::$instance->getLogsRessource(2),
@@ -3314,7 +3340,7 @@ function BonusCarbonTrackRessource($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "K")
     {
-        self::DbQuery( "UPDATE player set potassium = potassium +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` +1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${k} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'k' => undergrove::$instance->getLogsRessource(3),
@@ -3341,14 +3367,14 @@ function argBonusCarbonTrackRacine($parg1, $parg2)
     $ret['title'] = clienttranslate('${actplayer} triggers a bonus from the carbon track');
     $ret['titleyou'] = clienttranslate('${you} can place a root (Bonus Carbon Track)');
 
-        $ret["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $ret["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
 
         foreach ($ret["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $ret["selectable"][]=$racine;
@@ -3366,7 +3392,7 @@ function argBonusCarbonTrackRacine($parg1, $parg2)
 
 function BonusCarbonTrackRacine($parg1, $parg2, $varg1, $varg2)
 {
-    $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location='{$varg1}'");
+    $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location`='{$varg1}'");
 
     undergrove::$instance->notifyAllPlayers("placeracine",clienttranslate( '${player_name} places a root (bonus carbon track)' ), array(
             
@@ -3382,9 +3408,9 @@ function BonusCarbonTrackRacine($parg1, $parg2, $varg1, $varg2)
     undergrove::$instance->setGameStateValue('idcopieur', 0);     //pour que le bonus soit pris dans le meme tour ou pas
     $this->ScoreRacine ($varg1);
 
-    self::DbQuery( "UPDATE player set racine = racine -1  WHERE player_id = {$this->player_id}" );
-    self::DbQuery( "UPDATE foret set type = 'racine' WHERE location = '{$varg1}'" );
-    self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+    Table::DbQuery( "UPDATE `player` set `racine` = `racine` -1  WHERE `player_id` = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `foret` set `type` = 'racine' WHERE `location` = '{$varg1}'" );
+    Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
     undergrove::$instance->MajRessources();
 
@@ -3405,7 +3431,7 @@ function argBonusCarbonTrackEnd($parg1, $parg2)
     $ret['title'] = clienttranslate('${actplayer} triggers a bonus from the carbon track');
     $ret['titleyou'] = clienttranslate('${you} must choose your carbon track bonus');
     
-    $test = self::getObjectListFromDB( "SELECT track FROM player", true );
+    $test = Table::getObjectListFromDB( "SELECT `track` FROM `player`", true );
     if (!in_array(9, $test))
     {
     $ret["selectable"][]= "selecttrack9";
@@ -3439,7 +3465,7 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "selecttrack9")
     {
-        self::DbQuery( "UPDATE player set track = 9  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `track` = 9  WHERE `player_id` = {$this->player_id}" );
         
 
         undergrove::$instance->notifyAllPlayers('carbontrack','', array(
@@ -3450,16 +3476,16 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
 
 
         
-        $nbracine = self::getUniqueValueFromDB("SELECT racine FROM player WHERE player_id={$this->player_id}");
+        $nbracine = Table::getUniqueValueFromDB("SELECT `racine` FROM `player` WHERE `player_id`={$this->player_id}");
 
-        $tableau["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $tableau["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
         $emplacement = array();
         foreach ($tableau["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $emplacement[]=$racine;
@@ -3488,7 +3514,7 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
                 $securite = 1;
                 for ($i = 1; $i <= $this->player_no; $i++)
                 {
-                    self::DbQuery( "UPDATE player set final = 1 WHERE player_no={$i}" );
+                    Table::DbQuery( "UPDATE `player` set `final` = 1 WHERE `player_no`={$i}" );
                 }
                 }
 
@@ -3517,7 +3543,7 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "selecttrack10")
     {
-        self::DbQuery( "UPDATE player set track = 10  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `track` = 10  WHERE `player_id` = {$this->player_id}" );
                 
         undergrove::$instance->notifyAllPlayers('carbontrack',clienttranslate( '${player_name} gains ${c} and 2 resources (bonus carbon track)' ), array(
             'track' =>  10,
@@ -3526,7 +3552,7 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
             )
             );
         
-        self::DbQuery( "UPDATE player set carbone = carbone +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone` +1  WHERE `player_id` = {$this->player_id}" );
         $compteurcarbone = undergrove::$instance->getGameStateValue('compteurcarbone') + 1;
         undergrove::$instance->setGameStateValue('compteurcarbone', $compteurcarbone);
         undergrove::$instance->MajRessources();
@@ -3535,12 +3561,12 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "selecttrack11")
     {
-        self::DbQuery( "UPDATE player set carbone = carbone +3  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `carbone` = `carbone` +3  WHERE `player_id` = {$this->player_id}" );
         $compteurcarbone = undergrove::$instance->getGameStateValue('compteurcarbone') + 3;
         undergrove::$instance->setGameStateValue('compteurcarbone', $compteurcarbone);
         undergrove::$instance->MajRessources();
 
-        self::DbQuery( "UPDATE player set track = 11  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `track` = 11  WHERE `player_id` = {$this->player_id}" );
                 
         undergrove::$instance->notifyAllPlayers('carbontrack',clienttranslate( '${player_name} gains ${c} ${c} ${c} (bonus carbon track)' ), array(
             'track' =>  11,
@@ -3565,7 +3591,7 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
     $securite = 1;
     for ($i = 1; $i <= $this->player_no; $i++)
     {
-        self::DbQuery( "UPDATE player set final = 1 WHERE player_no={$i}" );
+        Table::DbQuery( "UPDATE `player` set `final` = 1 WHERE `player_no`={$i}" );
     }
     }
 
@@ -3579,7 +3605,7 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "selecttrack12")
     {
-        self::DbQuery( "UPDATE player set track = 12  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `track` = 12  WHERE `player_id` = {$this->player_id}" );
                 
         undergrove::$instance->notifyAllPlayers('carbontrack',clienttranslate('${player_name} gains a reactivation of a token and a resource (bonus carbon track)' ), array(
             'track' =>  12,
@@ -3591,10 +3617,10 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "selecttrack13")
     {
-        self::DbQuery( "UPDATE player set bonus_score = bonus_score +2  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `bonus_score` = `bonus_score` +2  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->MajRessources();
 
-        self::DbQuery( "UPDATE player set track = 13  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `track` = 13  WHERE `player_id` = {$this->player_id}" );
                 
         undergrove::$instance->notifyAllPlayers('carbontrack',clienttranslate( '${player_name} gains 2 victory points (bonus carbon track)' ), array(
             'track' =>  13,
@@ -3617,7 +3643,7 @@ function BonusCarbonTrackEnd($parg1, $parg2, $varg1, $varg2)
     $securite = 1;
     for ($i = 1; $i <= $this->player_no; $i++)
     {
-        self::DbQuery( "UPDATE player set final = 1 WHERE player_no={$i}" );
+        Table::DbQuery( "UPDATE `player` set `final` = 1 WHERE `player_no`={$i}" );
     }
     }
 
@@ -3642,14 +3668,14 @@ function argBonusCarbonTrackEndRacine($parg1, $parg2)
     $ret['title'] = clienttranslate('${actplayer} triggers a bonus from the carbon track');
     $ret['titleyou'] = clienttranslate('${you} can place a root');
 
-        $ret["racinelibre"] = self::getObjectListFromDB( "SELECT location location FROM foret WHERE type = 'emplacement_racine'", true );
+        $ret["racinelibre"] = Table::getObjectListFromDB( "SELECT `location` `location` FROM `foret` WHERE `type` = 'emplacement_racine'", true );
 
         foreach ($ret["racinelibre"] as $racine)
         {
             
             $explode = explode("_", $racine);
             $controle = "circle_".$explode[3]."_".$explode[4];
-            $test = self::getUniqueValueFromDB("SELECT player_id FROM foret WHERE location='{$controle}' AND (type='semi' OR type='arbre')");
+            $test = Table::getUniqueValueFromDB("SELECT `player_id` FROM `foret` WHERE `location`='{$controle}' AND (`type`='semi' OR `type`='arbre')");
             if ($test == $this->player_id)
             {
                 $ret["selectable"][]=$racine;
@@ -3668,7 +3694,7 @@ function argBonusCarbonTrackEndRacine($parg1, $parg2)
 function BonusCarbonTrackEndRacine($parg1, $parg2, $varg1, $varg2)
 {
 
-    $sens = self::getUniqueValueFromDB("SELECT sens_racine FROM foret WHERE location='{$varg1}'");
+    $sens = Table::getUniqueValueFromDB("SELECT `sens_racine` FROM `foret` WHERE `location`='{$varg1}'");
 
     undergrove::$instance->notifyAllPlayers("placeracine",clienttranslate( '${player_name} places a root (bonus carbon track)' ), array(
             
@@ -3684,9 +3710,9 @@ function BonusCarbonTrackEndRacine($parg1, $parg2, $varg1, $varg2)
     undergrove::$instance->setGameStateValue('idcopieur', 0);     //pour que le bonus soit pris dans le meme tour ou pas
     $this->ScoreRacine ($varg1);
 
-    self::DbQuery( "UPDATE player set racine = racine -1  WHERE player_id = {$this->player_id}" );
-    self::DbQuery( "UPDATE foret set type = 'racine' WHERE location = '{$varg1}'" );
-    self::DbQuery( "UPDATE foret set player_id = {$this->player_id} WHERE location = '{$varg1}'" );
+    Table::DbQuery( "UPDATE `player` set `racine` = `racine` -1  WHERE `player_id` = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `foret` set `type` = 'racine' WHERE `location` = '{$varg1}'" );
+    Table::DbQuery( "UPDATE `foret` set `player_id` = {$this->player_id} WHERE `location` = '{$varg1}'" );
 
     undergrove::$instance->MajRessources();
 
@@ -3704,7 +3730,7 @@ function BonusCarbonTrackEndRacine($parg1, $parg2, $varg1, $varg2)
     $securite = 1;
     for ($i = 1; $i <= $this->player_no; $i++)
     {
-        self::DbQuery( "UPDATE player set final = 1 WHERE player_no={$i}" );
+        Table::DbQuery( "UPDATE `player` set `final` = 1 WHERE `player_no`={$i}" );
     }
     }
 
@@ -3741,7 +3767,7 @@ function BonusCarbonTrackEndTrack10($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "N")
     {
-        self::DbQuery( "UPDATE player set azote = azote + 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` + 1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${n} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'n' => undergrove::$instance->getLogsRessource(1),
@@ -3751,7 +3777,7 @@ function BonusCarbonTrackEndTrack10($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "P")
     {
-        self::DbQuery( "UPDATE player set phosphore = phosphore +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` +1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${p} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'p' => undergrove::$instance->getLogsRessource(2),
@@ -3761,7 +3787,7 @@ function BonusCarbonTrackEndTrack10($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "K")
     {
-        self::DbQuery( "UPDATE player set potassium = potassium +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` +1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${k} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'k' => undergrove::$instance->getLogsRessource(3),
@@ -3798,7 +3824,7 @@ function BonusCarbonTrackEndTrack102($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "N")
     {
-        self::DbQuery( "UPDATE player set azote = azote + 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` + 1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${n} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'n' => undergrove::$instance->getLogsRessource(1),
@@ -3808,7 +3834,7 @@ function BonusCarbonTrackEndTrack102($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "P")
     {
-        self::DbQuery( "UPDATE player set phosphore = phosphore +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` +1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${p} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'p' => undergrove::$instance->getLogsRessource(2),
@@ -3818,7 +3844,7 @@ function BonusCarbonTrackEndTrack102($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "K")
     {
-        self::DbQuery( "UPDATE player set potassium = potassium +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` +1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${k} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'k' => undergrove::$instance->getLogsRessource(3),
@@ -3842,7 +3868,7 @@ function BonusCarbonTrackEndTrack102($parg1, $parg2, $varg1, $varg2)
     $securite = 1;
     for ($i = 1; $i <= $this->player_no; $i++)
     {
-        self::DbQuery( "UPDATE player set final = 1 WHERE player_no={$i}" );
+        Table::DbQuery( "UPDATE `player` set `final` = 1 WHERE `player_no`={$i}" );
     }
     }
 
@@ -3890,7 +3916,7 @@ function BonusCarbonTrackEndTrack12($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "Activationb")
     {
-        self::DbQuery( "UPDATE player set activation_b = 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_b` = 1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} reactivates ${b}' ), array(
             'player_name' => $this->player_name,
             'b' => undergrove::$instance->getLogsActivation(1),
@@ -3900,7 +3926,7 @@ function BonusCarbonTrackEndTrack12($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "Activationp")
     {
-        self::DbQuery( "UPDATE player set activation_p = 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_p` = 1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} reactivates ${p}' ), array(
             'player_name' => $this->player_name,
             'p' => undergrove::$instance->getLogsActivation(2),
@@ -3910,7 +3936,7 @@ function BonusCarbonTrackEndTrack12($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "Activationg")
     {
-        self::DbQuery( "UPDATE player set activation_g = 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_g` = 1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} reactivates ${g}' ), array(
             'player_name' => $this->player_name,
             'g' => undergrove::$instance->getLogsActivation(3),
@@ -3920,7 +3946,7 @@ function BonusCarbonTrackEndTrack12($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "Activationy")
     {
-        self::DbQuery( "UPDATE player set activation_y = 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `activation_y` = 1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} reactivates ${y}' ), array(
             'player_name' => $this->player_name,
             'y' => undergrove::$instance->getLogsActivation(4),
@@ -3956,7 +3982,7 @@ function BonusCarbonTrackEndTrack122($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "N")
     {
-        self::DbQuery( "UPDATE player set azote = azote + 1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `azote` = `azote` + 1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${n} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'n' => undergrove::$instance->getLogsRessource(1),
@@ -3966,7 +3992,7 @@ function BonusCarbonTrackEndTrack122($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "P")
     {
-        self::DbQuery( "UPDATE player set phosphore = phosphore +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `phosphore` = `phosphore` +1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${p} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'p' => undergrove::$instance->getLogsRessource(2),
@@ -3976,7 +4002,7 @@ function BonusCarbonTrackEndTrack122($parg1, $parg2, $varg1, $varg2)
 
     if ($varg1 == "K")
     {
-        self::DbQuery( "UPDATE player set potassium = potassium +1  WHERE player_id = {$this->player_id}" );
+        Table::DbQuery( "UPDATE `player` set `potassium` = `potassium` +1  WHERE `player_id` = {$this->player_id}" );
         undergrove::$instance->notifyAllPlayers('message',clienttranslate( '${player_name} gains ${k} (bonus carbon track)' ), array(
             'player_name' => $this->player_name,
             'k' => undergrove::$instance->getLogsRessource(3),
@@ -4001,7 +4027,7 @@ function BonusCarbonTrackEndTrack122($parg1, $parg2, $varg1, $varg2)
     $securite = 1;
     for ($i = 1; $i <= $this->player_no; $i++)
     {
-        self::DbQuery( "UPDATE player set final = 1 WHERE player_no={$i}" );
+        Table::DbQuery( "UPDATE `player` set `final` = 1 WHERE `player_no`={$i}" );
     }
     }
 
@@ -4025,17 +4051,17 @@ function argBonusCarbonTrackTiles($parg1, $parg2)
     $tiles = array();
     if ($parg1 == 2)
     {
-    $tiles = self::getObjectListFromDB( "SELECT card_type type FROM tiles WHERE card_location = 'tiles_1'", true );
+    $tiles = Table::getObjectListFromDB( "SELECT `card_type` `type` FROM `tiles` WHERE `card_location` = 'tiles_1'", true );
     }
 
     if ($parg1 == 4)
     {
-    $tiles = self::getObjectListFromDB( "SELECT card_type type FROM tiles WHERE card_location = 'tiles_2'", true );
+    $tiles = Table::getObjectListFromDB( "SELECT `card_type` `type` FROM `tiles` WHERE `card_location` = 'tiles_2'", true );
     }
 
     if ($parg1 == 6)
     {
-    $tiles = self::getObjectListFromDB( "SELECT card_type type FROM tiles WHERE card_location = 'tiles_3'", true );
+    $tiles = Table::getObjectListFromDB( "SELECT `card_type` `type` FROM `tiles` WHERE `card_location` = 'tiles_3'", true );
     }
 
     foreach($tiles as $type)
@@ -4051,7 +4077,7 @@ function BonusCarbonTrackTiles($parg1, $parg2, $varg1, $varg2)
 {
     $explodebonus = explode("_", $varg1);
     $type = intval($explodebonus[1]);
-    $bonusid = self::getUniqueValueFromDB("SELECT card_id FROM tiles WHERE card_type={$type}");
+    $bonusid = Table::getUniqueValueFromDB("SELECT `card_id` FROM `tiles` WHERE `card_type`={$type}");
     if ($parg1 == 2)
     {
     $position = 1;
@@ -4074,13 +4100,13 @@ function BonusCarbonTrackTiles($parg1, $parg2, $varg1, $varg2)
 
     if (($type == 11)||($type == 12)||($type == 13))
     {
-    self::DbQuery( "UPDATE player set bonus_score = bonus_score +1  WHERE player_id = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `player` set `bonus_score` = `bonus_score` +1  WHERE `player_id` = {$this->player_id}" );
     undergrove::$instance->MajRessources();
     }
 
     if (($type == 14)||($type == 15)||($type == 16))
     {
-    self::DbQuery( "UPDATE player set bonus_score = bonus_score +2  WHERE player_id = {$this->player_id}" );
+    Table::DbQuery( "UPDATE `player` set `bonus_score` = `bonus_score` +2  WHERE `player_id` = {$this->player_id}" );
     undergrove::$instance->MajRessources();
     }
     
@@ -4120,13 +4146,13 @@ function argConfirm($parg1, $parg2)
             {
 
                 $newid = undergrove::$instance->getGameStateValue('variable1');
-                self::DbQuery( "UPDATE champignon set card_location = '{$hand}'  WHERE card_id = {$newid}" );
+                Table::DbQuery( "UPDATE `champignon` set `card_location` = '{$hand}'  WHERE `card_id` = {$newid}" );
                 undergrove::$instance->notifyAllPlayers("hand",'', array(
             
                     'id' =>  $newid,
-                    'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$newid}"),
-                    'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$newid}"),
-                    'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}"),
+                    'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$newid}"),
+                    'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$newid}"),
+                    'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}"),
                     
                 )
                 );
@@ -4135,13 +4161,13 @@ function argConfirm($parg1, $parg2)
             if(undergrove::$instance->getGameStateValue('variable2')!=0)
             {
                 $newid = undergrove::$instance->getGameStateValue('variable2');
-                self::DbQuery( "UPDATE champignon set card_location = '{$hand}'  WHERE card_id = {$newid}" );
+                Table::DbQuery( "UPDATE `champignon` set `card_location` = '{$hand}'  WHERE `card_id` = {$newid}" );
                 undergrove::$instance->notifyAllPlayers("hand",'', array(
             
                     'id' =>  $newid,
-                    'location' => self::getUniqueValueFromDB("SELECT card_location location FROM champignon WHERE card_id={$newid}"),
-                    'position' => self::getUniqueValueFromDB("SELECT card_location_arg location_arg FROM champignon WHERE card_id={$newid}"),
-                    'type' => self::getUniqueValueFromDB("SELECT card_type type FROM champignon WHERE card_id={$newid}"),
+                    'location' => Table::getUniqueValueFromDB("SELECT `card_location` `location` FROM `champignon` WHERE `card_id`={$newid}"),
+                    'position' => Table::getUniqueValueFromDB("SELECT `card_location_arg` location_arg FROM `champignon` WHERE `card_id`={$newid}"),
+                    'type' => Table::getUniqueValueFromDB("SELECT `card_type` `type` FROM `champignon` WHERE `card_id`={$newid}"),
                     
                 )
                 );

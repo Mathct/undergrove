@@ -22,16 +22,16 @@ class Champi46 extends Champi
     public function init($parg1, $parg2, $varg1, $varg2)
     {
                
-        self::DbQuery( "UPDATE player set carbone = carbone WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set azote = azote  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set phosphore = phosphore  WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set potassium = potassium  WHERE player_id = {$this->player_id}" );
+        self::DbQuery( "UPDATE `player` set `carbone` = `carbone` WHERE `player_id` = {$this->player_id}" );
+        self::DbQuery( "UPDATE `player` set `azote` = `azote`  WHERE `player_id` = {$this->player_id}" );
+        self::DbQuery( "UPDATE `player` set `phosphore` = `phosphore`  WHERE `player_id` = {$this->player_id}" );
+        self::DbQuery( "UPDATE `player` set `potassium` = `potassium`  WHERE `player_id` = {$this->player_id}" );
 
        
-        self::DbQuery( "UPDATE player set activation_b = activation_b WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set activation_p = activation_p WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set activation_g = 1 WHERE player_id = {$this->player_id}" );
-        self::DbQuery( "UPDATE player set activation_y = 0 WHERE player_id = {$this->player_id}" );
+        self::DbQuery( "UPDATE `player` set `activation_b` = `activation_b` WHERE `player_id` = {$this->player_id}" );
+        self::DbQuery( "UPDATE `player` set `activation_p` = `activation_p` WHERE `player_id` = {$this->player_id}" );
+        self::DbQuery( "UPDATE `player` set `activation_g` = 1 WHERE `player_id` = {$this->player_id}" );
+        self::DbQuery( "UPDATE `player` set `activation_y` = 0 WHERE `player_id` = {$this->player_id}" );
 
 
         if ($parg1 != null)
@@ -40,8 +40,8 @@ class Champi46 extends Champi
             
             $explodechampi = explode("_", $parg1);
             $idcopieur = intval($explodechampi[1]);
-            $typecopieur = self::getUniqueValueFromDB("SELECT card_type FROM champignon WHERE card_id={$idcopieur}");
-            self::DbQuery( "UPDATE champignon set carbone = carbone  WHERE card_type = {$typecopieur}" );                        //////////// changer nbre carbone
+            $typecopieur = self::getUniqueValueFromDB("SELECT `card_type` FROM `champignon` WHERE `card_id`={$idcopieur}");
+            self::DbQuery( "UPDATE `champignon` set `carbone` = `carbone`  WHERE `card_type` = {$typecopieur}" );                        //////////// changer nbre carbone
 
             undergrove::$instance->notifyAllPlayers("message",clienttranslate( '${player_name} activated ${name1} and copies ${name2}' ), array(
 
@@ -57,7 +57,7 @@ class Champi46 extends Champi
         else 
 
         {
-            self::DbQuery( "UPDATE champignon set carbone = carbone  WHERE card_type = 46" );        //////////// changer le type et nbre carbone
+            self::DbQuery( "UPDATE `champignon` set `carbone` = `carbone`  WHERE `card_type` = 46" );        //////////// changer le type et nbre carbone
             undergrove::$instance->notifyAllPlayers("message",clienttranslate( '${player_name} activated ${name}' ), array(
 
                 'i18n' => array( 'name'),
@@ -71,7 +71,7 @@ class Champi46 extends Champi
 
         if($varg1 == "N")
         {
-            self::DbQuery( "UPDATE player set azote = azote+1  WHERE player_id = {$this->player_id}" );
+            self::DbQuery( "UPDATE `player` set `azote` = `azote`+1  WHERE `player_id` = {$this->player_id}" );
             undergrove::$instance->MajRessources();
             undergrove::$instance->GoalTrack();
             undergrove::$instance->CheckEnd();
